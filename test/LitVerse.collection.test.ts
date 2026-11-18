@@ -96,6 +96,67 @@ describe("LitVerse Collection Factory Integration Tests", function () {
     assert.equal(await nft.ownerOf(1n), await creator.getAddress());
   });
 
+  it("creates a collection with an enforced mint end date", async function () {
+    const { ethers } = await network.connect();
+    const [owner, creator] = await ethers.getSigners();
+
+    const implementation = await deployNFTImplementation(ethers);
+    const factory = await deployCollectionFactory(ethers, owner, implementation);
+    const latest = await ethers.provider.getBlock("latest");
+    assert.ok(latest);
+
+    const saleStartTime = BigInt(latest.timestamp + 60);
+    const saleEndTime = saleStartTime + 3600n;
+    const saleConfig = {
+      ...config(ethers, "Timed Drop"),
+      saleStartTime,
+      saleEndTime,
+    };
+
+    await factory.connect(creator).createCollectionWithSaleEnd(saleConfig);
+    const collection = await factory.getCollection(1n);
+    const nftFactory = await ethers.getContractFactory("LitVerseNFT");
+    const nft = nftFactory.attach(collection.collectionAddress);
+
+    assert.equal(await nft.saleEndTime(), saleEndTime);
+    assert.equal(await nft.owner(), await creator.getAddress());
+
+    await ethers.provider.send("evm_setNextBlockTimestamp", [Number(saleStartTime)]);
+    await ethers.provider.send("evm_mine", []);
+    await nft.connect(creator).publicMint(1n, {
+      value: ethers.parseEther("0.01"),
+    });
+    assert.equal(await nft.totalMinted(), 1n);
+
+    await ethers.provider.send("evm_setNextBlockTimestamp", [Number(saleEndTime + 1n)]);
+    await ethers.provider.send("evm_mine", []);
+    await assert.rejects(
+      nft.connect(creator).publicMint(1n, {
+        value: ethers.parseEther("0.01"),
+      })
+    );
+    assert.equal(await nft.totalMinted(), 1n);
+  });
+
+  it("rejects a sale end time that is not after the sale start", async function () {
+    const { ethers } = await network.connect();
+    const [owner, creator] = await ethers.getSigners();
+    const implementation = await deployNFTImplementation(ethers);
+    const factory = await deployCollectionFactory(ethers, owner, implementation);
+    const latest = await ethers.provider.getBlock("latest");
+    assert.ok(latest);
+    const saleStartTime = BigInt(latest.timestamp + 60);
+
+    await assert.rejects(
+      factory.connect(creator).createCollectionWithSaleEnd({
+        ...config(ethers, "Invalid Timed Drop"),
+        saleStartTime,
+        saleEndTime: saleStartTime,
+      })
+    );
+    assert.equal(await factory.collectionCount(), 0n);
+  });
+
   it("rejects invalid collection configurations", async function () {
     const { ethers } = await network.connect();
     const [owner, creator] = await ethers.getSigners();
