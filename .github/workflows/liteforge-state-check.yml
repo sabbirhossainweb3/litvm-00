@@ -23,6 +23,8 @@ jobs:
         run: node scripts/verify-live-implementations.mjs
       - name: Fetch verified live implementation sources
         run: node scripts/fetch-live-upgrade-baselines.mjs
+      - name: Compile fetched live implementation baselines
+        run: npm run compile
       - name: Validate UUPS storage compatibility against deployed sources
         run: node scripts/validate-live-uups-upgrade.mjs
       - name: Read LiteForge proxy and escrow state (no transactions)
