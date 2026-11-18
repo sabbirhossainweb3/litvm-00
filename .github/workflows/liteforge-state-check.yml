@@ -16,5 +16,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run compile
       - name: Read LiteForge proxy and escrow state (no transactions)
         run: node scripts/check-liteforge-proxy-state.mjs
