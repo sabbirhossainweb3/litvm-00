@@ -1,4 +1,4 @@
-// Read-only LiteForge snapshot; triggered alongside live UUPS baseline validation.
+// Read-only LiteForge snapshot; retrying after switching all explorer and RPC checks to Zeeve.
 import { Contract, JsonRpcProvider, getAddress } from "ethers";
 
 const RPC = process.env.LITEFORGE_RPC_URL || "https://rpc.testnet.liteforge.zeeve.net/";
