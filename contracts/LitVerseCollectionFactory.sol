@@ -21,18 +21,20 @@ interface ILitVerseNFTInitializer {
         string memory hiddenMetadataURI
     ) external;
 
-    function initializeWithSaleEnd(
-        address initialOwner,
-        string memory collectionName,
-        string memory collectionSymbol,
-        uint256 maxSupply,
-        uint256 mintPrice,
-        uint256 walletLimit,
-        uint256 saleStartTime,
-        uint256 saleEndTime,
-        address royaltyReceiver,
-        string memory hiddenMetadataURI
-    ) external;
+    struct NFTInitConfig {
+        address initialOwner;
+        string collectionName;
+        string collectionSymbol;
+        uint256 maxSupply;
+        uint256 mintPrice;
+        uint256 walletLimit;
+        uint256 saleStartTime;
+        uint256 saleEndTime;
+        address royaltyReceiver;
+        string hiddenMetadataURI;
+    }
+
+    function initializeWithSaleEnd(NFTInitConfig calldata config) external;
 }
 
 contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, PausableUpgradeable, UUPSUpgradeable {
@@ -143,20 +145,21 @@ contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, Pausabl
         require(config.saleEndTime > config.saleStartTime, "Invalid sale window");
         require(nftImplementation.code.length > 0, "Invalid implementation");
 
+        ILitVerseNFTInitializer.NFTInitConfig memory nftConfig = ILitVerseNFTInitializer.NFTInitConfig({
+            initialOwner: msg.sender,
+            collectionName: config.name,
+            collectionSymbol: config.symbol,
+            maxSupply: config.maxSupply,
+            mintPrice: config.mintPrice,
+            walletLimit: config.walletLimit,
+            saleStartTime: config.saleStartTime,
+            saleEndTime: config.saleEndTime,
+            royaltyReceiver: msg.sender,
+            hiddenMetadataURI: config.hiddenMetadataURI
+        });
         bytes memory initData = abi.encodeCall(
             ILitVerseNFTInitializer.initializeWithSaleEnd,
-            (
-                msg.sender,
-                config.name,
-                config.symbol,
-                config.maxSupply,
-                config.mintPrice,
-                config.walletLimit,
-                config.saleStartTime,
-                config.saleEndTime,
-                msg.sender,
-                config.hiddenMetadataURI
-            )
+            (nftConfig)
         );
 
         address collectionAddress = address(new ERC1967Proxy(nftImplementation, initData));
