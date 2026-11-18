@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "scripts/check-liteforge-proxy-state.mjs"
+      - "scripts/verify-live-implementations.mjs"
+      - "scripts/fetch-live-upgrade-baselines.mjs"
       - ".github/workflows/liteforge-state-check.yml"
 jobs:
   snapshot:
@@ -16,9 +18,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run compile
+      - name: Verify live implementation sources on Zeeve Explorer (bytecode match required)
+        run: node scripts/verify-live-implementations.mjs
       - name: Fetch verified live implementation sources
         run: node scripts/fetch-live-upgrade-baselines.mjs
-      - run: npm run compile
       - name: Validate UUPS storage compatibility against deployed sources
         run: node scripts/validate-live-uups-upgrade.mjs
       - name: Read LiteForge proxy and escrow state (no transactions)
