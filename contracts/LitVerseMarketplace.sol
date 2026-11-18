@@ -142,6 +142,9 @@ contract LitVerseMarketplace is
         emit ListingCancelled(listingId);
     }
 
+    /// @notice Signals frontend support for approval-free, one-transaction listings.
+    function supportsOneTransactionListing() external pure returns (bool) { return true; }
+
     /// @notice Configure the trusted LitVerse collection factory.
     /// @dev Once configured, unregistered external collections require explicit approval.
     function setCollectionFactory(address factory) external onlyOwner {
