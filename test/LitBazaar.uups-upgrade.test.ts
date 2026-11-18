@@ -136,4 +136,75 @@ describe("LitBazaar UUPS upgrade compatibility and state preservation", function
     assert.equal(record.claimed, false);
     assert.equal(await nft.ownerOf(1n), await upgraded.getAddress());
   });
+
+  it("approves the existing Genesis collection atomically and creates approval-free Marketplace listings", async function () {
+    const [owner, seller, fee, royalty] = await ethers.getSigners();
+    const Market = await ethers.getContractFactory("LitVerseMarketplace");
+    const market = await upgradesApi.deployProxy(
+      Market,
+      [await owner.getAddress(), await fee.getAddress(), 250n],
+      { kind: "uups" }
+    );
+    const nft = await deployNFT(owner, royalty);
+
+    await market.setCollectionFactory(await nft.getAddress());
+    await nft.connect(seller).publicMint(1n, { value: ethers.parseEther("0.01") });
+    await market.initializeV2(await nft.getAddress());
+
+    const price = ethers.parseEther("0.75");
+    const data = ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [price]);
+    await nft.connect(seller)["safeTransferFrom(address,address,uint256,bytes)"](
+      await seller.getAddress(),
+      await market.getAddress(),
+      1n,
+      data
+    );
+
+    assert.equal(await market.approvedCollections(await nft.getAddress()), true);
+    assert.equal(await market.supportsOneTransactionListing(), true);
+    assert.equal(await market.nextListingId(), 2n);
+    const listing = await market.listings(1n);
+    assert.equal(listing.active, true);
+    assert.equal(listing.price, price);
+    assert.equal(listing.seller, await seller.getAddress());
+    assert.equal(await nft.ownerOf(1n), await market.getAddress());
+  });
+
+  it("approves the existing Genesis collection atomically and creates approval-free auctions", async function () {
+    const [owner, seller, fee, royalty] = await ethers.getSigners();
+    const Auction = await ethers.getContractFactory("LitVerseAuction");
+    const auction = await upgradesApi.deployProxy(
+      Auction,
+      [await owner.getAddress(), await fee.getAddress(), 250n],
+      { kind: "uups" }
+    );
+    const nft = await deployNFT(owner, royalty);
+
+    await auction.setCollectionFactory(await nft.getAddress());
+    await nft.connect(seller).publicMint(1n, { value: ethers.parseEther("0.01") });
+    await auction.initializeV2(await nft.getAddress());
+
+    const reservePrice = ethers.parseEther("1");
+    const duration = 3600n;
+    const data = ethers.AbiCoder.defaultAbiCoder().encode(
+      ["uint256", "uint256"],
+      [reservePrice, duration]
+    );
+    await nft.connect(seller)["safeTransferFrom(address,address,uint256,bytes)"](
+      await seller.getAddress(),
+      await auction.getAddress(),
+      1n,
+      data
+    );
+
+    assert.equal(await auction.approvedCollections(await nft.getAddress()), true);
+    assert.equal(await auction.supportsOneTransactionAuction(), true);
+    assert.equal(await auction.nextAuctionId(), 2n);
+    const record = await auction.auctions(1n);
+    assert.equal(record.seller, await seller.getAddress());
+    assert.equal(record.reservePrice, reservePrice);
+    assert.equal(record.finalized, false);
+    assert.equal(await nft.ownerOf(1n), await auction.getAddress());
+  });
+
 });
