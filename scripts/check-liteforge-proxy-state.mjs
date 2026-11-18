@@ -178,8 +178,8 @@ async function main() {
   }
   const bytecodeComparisons = [];
   for (const [label, artifactPath, proxyKey] of [
-    ["marketplace", "artifacts/contracts/upgrade-baselines/LitVerseMarketplaceV1.sol/LitVerseMarketplaceV1.json", "marketplace"],
-    ["auction", "artifacts/contracts/upgrade-baselines/LitVerseAuctionV1.sol/LitVerseAuctionV1.json", "auction"],
+    ["marketplace", "artifacts/contracts/upgrade-baselines/live/LitVerseMarketplaceLiveV1.sol/LitVerseMarketplaceLiveV1.json", "marketplace"],
+    ["auction", "artifacts/contracts/upgrade-baselines/live/LitVerseAuctionLiveV1.sol/LitVerseAuctionLiveV1.json", "auction"],
   ]) {
     const artifact = JSON.parse(readFileSync(artifactPath, "utf8"));
     const onchain = await provider.getCode(proxyInfoResult[proxyKey].implementation);
