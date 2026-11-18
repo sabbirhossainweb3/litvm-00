@@ -72,6 +72,16 @@ async function explorerVerification(address) {
       optimizationEnabled: data.optimization_enabled ?? null,
       filePath: data.file_path ?? null,
       sourceLength: typeof data.source_code === "string" ? data.source_code.length : null,
+      sourceShape: (() => {
+        if (typeof data.source_code !== "string") return typeof data.source_code;
+        try {
+          const parsed = JSON.parse(data.source_code);
+          const sources = parsed.sources ?? parsed;
+          return { format: "json", keys: Object.keys(sources).filter(key => key.endsWith(".sol")).slice(0, 30) };
+        } catch {
+          return { format: "plain-text", prefix: data.source_code.slice(0, 120) };
+        }
+      })(),
     };
   } catch (error) {
     return { verified: false, error: String(error) };
