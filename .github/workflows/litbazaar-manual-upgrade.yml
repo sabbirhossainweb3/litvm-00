@@ -1,0 +1,49 @@
+name: LitBazaar manual LiteForge UUPS upgrade
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Upgrade exactly one existing proxy"
+        required: true
+        type: choice
+        options:
+          - marketplace
+          - auction
+      confirm:
+        description: 'Type UPGRADE_LITBAZAAR to authorize the on-chain run'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: litbazaar-liteforge-uups-upgrade
+  cancel-in-progress: false
+
+jobs:
+  upgrade:
+    if: ${{ inputs.confirm == 'UPGRADE_LITBAZAAR' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Compile contracts
+        run: npm run compile
+      - name: Run full regression and upgrade tests
+        run: npm test
+      - name: Execute one guarded UUPS upgrade
+        env:
+          LITEFORGE_RPC_URL: ${{ secrets.LITEFORGE_RPC_URL }}
+          LITEFORGE_PRIVATE_KEY: ${{ secrets.LITEFORGE_PRIVATE_KEY }}
+          UPGRADE_TARGET: ${{ inputs.target }}
+        run: |
+          test -n "$LITEFORGE_RPC_URL" || (echo "Missing GitHub Actions secret LITEFORGE_RPC_URL" && exit 1)
+          test -n "$LITEFORGE_PRIVATE_KEY" || (echo "Missing GitHub Actions secret LITEFORGE_PRIVATE_KEY" && exit 1)
+          npx hardhat run scripts/upgrade-liteforge.ts --network liteforge
