@@ -96,15 +96,13 @@ contract LitVerseAuction is
             "Auction not approved"
         );
 
-        uint256 auctionId = nextAuctionId++;
-        uint256 endTime = block.timestamp + duration;
-
-        auctions[auctionId] = Auction(
-            nftContract, tokenId, msg.sender, reservePrice, 0, address(0), endTime, false, false
+        uint256 auctionId = nextAuctionId;
+        nft.safeTransferFrom(
+            msg.sender,
+            address(this),
+            tokenId,
+            abi.encode(reservePrice, duration)
         );
-
-        nft.safeTransferFrom(msg.sender, address(this), tokenId);
-        emit AuctionCreated(auctionId, nftContract, tokenId, msg.sender, reservePrice, endTime);
         return auctionId;
     }
 
@@ -253,7 +251,8 @@ contract LitVerseAuction is
         uint256 tokenId,
         bytes calldata data
     ) external override returns (bytes4) {
-        require(from != address(0) && operator == from, "Owner must initiate transfer");
+        require(from != address(0), "Invalid NFT sender");
+        require(operator == from || operator == address(this), "Unauthorized NFT operator");
         require(data.length == 64, "Auction data required");
         require(isCollectionApproved(msg.sender), "Collection not approved");
 
