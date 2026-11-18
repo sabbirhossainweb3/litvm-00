@@ -251,6 +251,7 @@ contract LitVerseAuction is
         uint256 tokenId,
         bytes calldata data
     ) external override returns (bytes4) {
+        require(!paused(), "Auction paused");
         require(from != address(0), "Invalid NFT sender");
         require(operator == from || operator == address(this), "Unauthorized NFT operator");
         require(data.length == 64, "Auction data required");
