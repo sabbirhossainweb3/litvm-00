@@ -6,6 +6,8 @@ on:
     paths:
       - "scripts/check-liteforge-proxy-state.mjs"
       - "scripts/verify-live-implementations.mjs"
+      - "contracts/LitVerseMarketplace.sol"
+      - "contracts/LitVerseAuction.sol"
       - "scripts/fetch-live-upgrade-baselines.mjs"
       - ".github/workflows/liteforge-state-check.yml"
 jobs:
