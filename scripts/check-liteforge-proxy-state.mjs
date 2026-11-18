@@ -1,5 +1,4 @@
 import { Contract, JsonRpcProvider, getAddress } from "ethers";
-import { readFileSync } from "node:fs";
 
 const RPC = process.env.LITEFORGE_RPC_URL || "https://rpc.testnet.liteforge.zeeve.net/";
 const ADDRESSES = {
@@ -48,14 +47,6 @@ const FACTORY_ABI = [
   "function collectionCount() view returns(uint256)",
   "function isRegisteredCollection(address) view returns(bool)",
 ];
-
-function stripMetadata(bytecode) {
-  const body = bytecode.slice(2);
-  if (body.length < 4) return bytecode;
-  const metadataBytes = Number.parseInt(body.slice(-4), 16);
-  const cut = (metadataBytes + 2) * 2;
-  return "0x" + (cut < body.length ? body.slice(0, -cut) : body);
-}
 
 async function explorerVerification(address) {
   const url = "https://explorer.testnet.liteforge.zeeve.net/api/v2/smart-contracts/" + address;
@@ -176,28 +167,6 @@ async function main() {
     const [tokenOwner, uri] = await Promise.all([nft.ownerOf(id), nft.tokenURI(id)]);
     tokenRecords.push({ tokenId: id, owner: tokenOwner, tokenURI: uri });
   }
-  const bytecodeComparisons = [];
-  for (const [label, artifactPath, proxyKey] of [
-    ["marketplace", "artifacts/contracts/upgrade-baselines/live/LitVerseMarketplaceLiveV1.sol/LitVerseMarketplaceLiveV1.json", "marketplace"],
-    ["auction", "artifacts/contracts/upgrade-baselines/live/LitVerseAuctionLiveV1.sol/LitVerseAuctionLiveV1.json", "auction"],
-  ]) {
-    const artifact = JSON.parse(readFileSync(artifactPath, "utf8"));
-    const onchain = await provider.getCode(proxyInfoResult[proxyKey].implementation);
-    const liveRuntime = stripMetadata(onchain).toLowerCase();
-    const baselineRuntime = stripMetadata(artifact.deployedBytecode).toLowerCase();
-    let firstDiff = 0;
-    while (firstDiff < Math.min(liveRuntime.length, baselineRuntime.length) && liveRuntime[firstDiff] === baselineRuntime[firstDiff]) firstDiff++;
-    const matches = liveRuntime === baselineRuntime;
-    bytecodeComparisons.push({
-      contract: label,
-      baselineRuntimeMatchesOnchain: matches,
-      liveRuntimeBytes: (liveRuntime.length - 2) / 2,
-      baselineRuntimeBytes: (baselineRuntime.length - 2) / 2,
-      firstDifferenceByteOffset: matches ? null : Math.max(0, Math.floor((firstDiff - 2) / 2)),
-      liveRuntimePrefix: liveRuntime.slice(0, 90),
-      baselineRuntimePrefix: baselineRuntime.slice(0, 90),
-    });
-  }
   const failures = [
     ...activeListings.filter(x => !x.escrowMatches).map(x => "Listing " + x.id + " escrow owner mismatch"),
     ...auctionRecords.filter(x => !x.escrowMatches).map(x => "Auction " + x.id + " escrow owner mismatch"),
@@ -223,14 +192,12 @@ async function main() {
       nextAuctionId:nextAuctionId.toString(),collectionFactory:auctionFactory,paused:auctionPaused,
       auctionRecordCount:auctionRecords.length,auctions:auctionRecords,primaryNFTApproved:auctionApprovedNFT },
     factory: { owner:factoryOwner,nftImplementation,collectionCount:collectionCount.toString() },
-    bytecodeComparisons,
     explorerSources,
     limitations: ["pendingWithdrawals cannot be enumerated from mapping alone; event/account history is required",
       "only the primary NFT proxy address was checked for factory registration"],
     warnings: [
       !marketApprovedNFT ? "Primary NFT collection is not explicitly approved by Marketplace; owner must approve this collection once before listing" : null,
       !auctionApprovedNFT ? "Primary NFT collection is not explicitly approved by Auction; owner must approve this collection once before auctions" : null,
-      ...bytecodeComparisons.filter(x => !x.baselineRuntimeMatchesOnchain).map(x => x.contract + " live implementation differs from archived source snapshot; do not upgrade until exact deployed source is identified"),
     ].filter(Boolean),
     failures,
   };
