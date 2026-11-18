@@ -10,3 +10,21 @@
 .footer-brand{display:inline-flex;align-items:center;gap:9px;margin:0;color:#292a27;font:700 19px 'Space Grotesk';text-decoration:none;letter-spacing:-.7px}
 .footer-brand img{width:30px;height:30px;display:block}
 @media(max-width:720px){.brand{font-size:20px}.brand img{width:34px;height:34px}}
+
+/* NFT artwork upload: desktop and mobile */
+.media-form{display:grid;gap:13px;margin-top:16px}
+.media-form label{display:flex;flex-direction:column;gap:7px;color:#696a64;font-size:11px;font-weight:600}
+.media-form input:not([type=file]),.media-form textarea{width:100%;border:1px solid #e2e2dc;border-radius:8px;background:#fff;padding:11px;outline-color:#e27660;font:inherit;color:#292a27;resize:vertical}
+.media-form input:not([type=file]){height:42px}
+.media-form textarea{min-height:84px}
+.media-form .file-picker{border:1px dashed #d7b5aa;border-radius:10px;background:#fff9f6;padding:15px;cursor:pointer}
+.media-form .file-picker input{width:100%;max-width:100%;font-size:12px;color:#555}
+.media-form .file-picker small{font-size:10px;color:#85867f;line-height:1.5;font-weight:400}
+.upload-preview{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #e9e9e3;border-radius:9px;min-width:0}
+.upload-preview img{width:88px;height:88px;object-fit:cover;border-radius:7px;background:#eeece6}
+.upload-preview span{font-size:11px;color:#777;overflow-wrap:anywhere}
+.manual-uri{margin-top:18px;border-top:1px solid #eee;padding-top:14px;font-size:11px;color:#777}
+.manual-uri summary{cursor:pointer;font-weight:700;margin-bottom:12px}
+.manual-uri label{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.manual-uri input{height:42px;border:1px solid #e2e2dc;border-radius:8px;padding:0 11px;width:100%}
+@media(max-width:720px){.media-form .file-picker{padding:13px}.upload-preview img{width:76px;height:76px}.media-form input[type=file]{font-size:11px}}
