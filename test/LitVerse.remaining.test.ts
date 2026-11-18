@@ -538,6 +538,62 @@ describe("LitVerse Marketplace Remaining Security", function () {
 // AUCTION REMAINING SECURITY & INTEGRATION TESTS
 // =====================================================
 
+describe("LitVerse Auction Approval-Free Flow", function () {
+  it("creates an auction in one safeTransferFrom without any NFT approval", async function () {
+    const { ethers } = await network.connect();
+    const [owner, seller, fee, royalty] = await ethers.getSigners();
+
+    const nft = await deployNFT(ethers, owner, royalty);
+    const auction = await deployAuction(ethers, owner, fee);
+    await nft.connect(seller).publicMint(1n, {
+      value: ethers.parseEther("0.01"),
+    });
+
+    assert.equal(
+      await nft.isApprovedForAll(await seller.getAddress(), await auction.getAddress()),
+      false
+    );
+
+    const data = ethers.AbiCoder.defaultAbiCoder().encode(
+      ["uint256", "uint256"],
+      [ethers.parseEther("0.5"), 3600n]
+    );
+    await nft.connect(seller)["safeTransferFrom(address,address,uint256,bytes)"](
+      await seller.getAddress(),
+      await auction.getAddress(),
+      1n,
+      data
+    );
+
+    assert.equal(await nft.ownerOf(1n), await auction.getAddress());
+    const auctionData = await auction.auctions(1n);
+    assert.equal(auctionData.seller, await seller.getAddress());
+    assert.equal(auctionData.reservePrice, ethers.parseEther("0.5"));
+    assert.equal(auctionData.endTime > 0n, true);
+    assert.equal(await auction.supportsOneTransactionAuction(), true);
+  });
+
+  it("rejects safe NFT transfers without auction parameters instead of trapping the NFT", async function () {
+    const { ethers } = await network.connect();
+    const [owner, seller, fee, royalty] = await ethers.getSigners();
+
+    const nft = await deployNFT(ethers, owner, royalty);
+    const auction = await deployAuction(ethers, owner, fee);
+    await nft.connect(seller).publicMint(1n, {
+      value: ethers.parseEther("0.01"),
+    });
+
+    await assert.rejects(
+      nft.connect(seller)["safeTransferFrom(address,address,uint256)"](
+        await seller.getAddress(),
+        await auction.getAddress(),
+        1n
+      )
+    );
+    assert.equal(await nft.ownerOf(1n), await seller.getAddress());
+  });
+});
+
 describe("LitVerse Auction Remaining Security", function () {
 
   it("rejects invalid auction configuration and unauthorized creation", async function () {
