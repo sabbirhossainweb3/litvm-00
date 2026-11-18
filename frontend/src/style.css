@@ -87,3 +87,26 @@
 .home-collection-info>div span{font-size:10px;color:#888}
 .home-collection-info>div b{font-size:11px;color:#292a27}
 @media(max-width:720px){.stats-marquee{margin-bottom:42px}.stat-chip{min-width:190px;padding:16px 18px}.stat-chip b{font-size:20px}.home-collections{margin-bottom:44px}.home-collection-card{width:210px}.home-collection-art{height:140px}}
+
+
+/* Wallet profile menu */
+.head-actions{position:relative}
+.profile-wrap{position:relative}
+.profile-trigger{display:flex;align-items:center;gap:7px;padding:11px 13px;border:1px solid #e4e4de;border-radius:9px;background:#fff;color:#33342f;font-size:12px;font-weight:700}
+.profile-trigger:hover,.profile-trigger.open{border-color:#df6049;color:#c94d37;background:#fff9f6}
+.profile-menu{position:absolute;right:0;top:calc(100% + 12px);width:290px;background:#fff;border:1px solid #e8e8e2;border-radius:13px;padding:15px;box-shadow:0 16px 40px #2425221c;z-index:20}
+.profile-menu-title{display:flex;align-items:center;gap:11px;padding-bottom:13px;border-bottom:1px solid #eee}
+.profile-avatar{width:38px;height:38px;border-radius:12px;background:#f8e9e3;color:#cf5943;display:grid;place-items:center}
+.profile-menu-title>div{display:flex;flex-direction:column;gap:4px}
+.profile-menu-title b{font:600 15px 'Space Grotesk';color:#292a27}
+.profile-menu-title small,.profile-address small,.profile-stats small{font-size:10px;color:#85867f}
+.profile-address{position:relative;padding:13px 26px 13px 0;border-bottom:1px solid #eee}
+.profile-address small{display:block;font-weight:700;letter-spacing:1px;margin-bottom:6px}
+.profile-address span{font-size:10px;color:#555;overflow-wrap:anywhere;line-height:1.5}
+.profile-address button{position:absolute;right:0;top:27px;border:0;background:#f5f4f0;border-radius:6px;padding:7px;color:#555}
+.profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:13px 0}
+.profile-stats>div{display:flex;flex-direction:column;gap:4px}
+.profile-stats b{font:600 20px 'Space Grotesk';color:#292a27}
+.profile-action{width:100%;display:flex;align-items:center;gap:9px;padding:10px;border:0;border-radius:7px;background:#f7eee9;color:#b94a36;font-size:11px;font-weight:700;margin-top:7px;text-align:left}
+.profile-action.muted-action{background:#f6f6f3;color:#777}
+@media(max-width:430px){.head-actions{gap:6px}.profile-trigger{padding:9px;font-size:0}.profile-trigger svg{width:17px;height:17px}.profile-menu{right:0;width:min(290px,calc(100vw - 36px))}.wallet{padding:10px 9px;font-size:10px}}
