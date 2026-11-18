@@ -660,11 +660,15 @@ describe("LitVerse Auction Remaining Security", function () {
       false
     );
 
-    await auction.connect(seller).createAuction(
-      await nft.getAddress(),
+    const auctionData = ethers.AbiCoder.defaultAbiCoder().encode(
+      ["uint256", "uint256"],
+      [ethers.parseEther("0.1"), 3600n]
+    );
+    await nft.connect(seller)["safeTransferFrom(address,address,uint256,bytes)"](
+      await seller.getAddress(),
+      await auction.getAddress(),
       1n,
-      ethers.parseEther("0.1"),
-      3600n
+      auctionData
     );
 
     assert.equal(
