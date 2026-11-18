@@ -89,7 +89,8 @@ contract LitVerseMarketplace is
 
         uint256 listingId = nextListingId++;
         listings[listingId] = Listing(nftContract, tokenId, msg.sender, price, true);
-        nft.safeTransferFrom(msg.sender, address(this), tokenId);
+        // Legacy approval-based entry point; the one-transaction receiver flow is separate.
+        nft.transferFrom(msg.sender, address(this), tokenId);
 
         emit NFTListed(listingId, nftContract, tokenId, msg.sender, price);
     }
@@ -195,12 +196,26 @@ contract LitVerseMarketplace is
         require(success, "Payment failed");
     }
 
-    function onERC721Received(address, address, uint256, bytes calldata)
+    /// @notice Accept an NFT and create its listing in the same wallet transaction.
+    /// @dev Send safeTransferFrom(owner, marketplace, tokenId, abi.encode(price)).
+    /// Empty-data transfers remain accepted for compatibility but do not create listings.
+    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data)
         external
-        pure
         override
+        whenNotPaused
         returns (bytes4)
     {
+        if (data.length != 0) {
+            require(data.length == 32, "Invalid listing data");
+            require(operator == from, "Owner must initiate listing");
+            require(isCollectionApproved(msg.sender), "Collection not approved");
+            uint256 price = abi.decode(data, (uint256));
+            require(price > 0, "Price must be greater than zero");
+            require(IERC721(msg.sender).ownerOf(tokenId) == address(this), "NFT not escrowed");
+            uint256 listingId = nextListingId++;
+            listings[listingId] = Listing(msg.sender, tokenId, from, price, true);
+            emit NFTListed(listingId, msg.sender, tokenId, from, price);
+        }
         return IERC721Receiver.onERC721Received.selector;
     }
 
