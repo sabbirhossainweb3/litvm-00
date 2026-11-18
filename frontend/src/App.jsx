@@ -32,7 +32,7 @@ function App(){
  const mint=async()=>{let c=await contracts(),n=c.n(selected),[p,paused]=await Promise.all([n.mintPrice(),n.paused()]);if(paused)throw Error('This NFT contract is paused. Minting is disabled.');await act(()=>n.publicMint(BigInt(qty),{value:p*BigInt(qty)}))};
  const create=async()=>{let c=await contracts();await act(()=>c.f.createCollection({name,symbol,maxSupply:BigInt(supply),mintPrice:parseEther(price),walletLimit:BigInt(limit),saleStartTime:BigInt(start||0),hiddenMetadataURI:hidden}))};
  const setTokenUri=async()=>{let c=await contracts();await act(()=>c.n(selected).setTokenURI(BigInt(uriId),uri))};
- const list=async()=>{let c=await contracts(),n=c.n(selected);if(!(await n.isApprovedForAll(account,A.market)))await(await n.setApprovalForAll(A.market,true)).wait();await act(()=>c.m.listNFT(selected,BigInt(listId),parseEther(listPrice)))};
+ const list=async()=>{let c=await contracts(),n=c.n(selected),price=parseEther(listPrice),data=AbiCoder.defaultAbiCoder().encode(['uint256'],[price]);await act(()=>n['safeTransferFrom(address,address,uint256,bytes)'](account,A.market,BigInt(listId),data))};
  const buy=async id=>{let c=await contracts(),v=await c.m.listings(BigInt(id));await act(()=>c.m.buyNFT(BigInt(id),{value:v[3]}))};
  const makeAuction=async()=>{let c=await contracts(),n=c.n(selected);if(!(await n.isApprovedForAll(account,A.auction)))await(await n.setApprovalForAll(A.auction,true)).wait();await act(()=>c.u.createAuction(selected,BigInt(auctionId),parseEther(reserve),BigInt(duration)))};
  const bid=async id=>{let c=await contracts();await act(()=>c.u.placeBid(BigInt(id),{value:parseEther(bidValue[id]||'0')}))};
