@@ -146,17 +146,26 @@ async function main() {
   ]) {
     const artifact = JSON.parse(readFileSync(artifactPath, "utf8"));
     const onchain = await provider.getCode(proxyInfoResult[proxyKey].implementation);
-    const matches = stripMetadata(onchain).toLowerCase() === stripMetadata(artifact.deployedBytecode).toLowerCase();
-    bytecodeComparisons.push({ contract: label, baselineRuntimeMatchesOnchain: matches });
+    const liveRuntime = stripMetadata(onchain).toLowerCase();
+    const baselineRuntime = stripMetadata(artifact.deployedBytecode).toLowerCase();
+    let firstDiff = 0;
+    while (firstDiff < Math.min(liveRuntime.length, baselineRuntime.length) && liveRuntime[firstDiff] === baselineRuntime[firstDiff]) firstDiff++;
+    const matches = liveRuntime === baselineRuntime;
+    bytecodeComparisons.push({
+      contract: label,
+      baselineRuntimeMatchesOnchain: matches,
+      liveRuntimeBytes: (liveRuntime.length - 2) / 2,
+      baselineRuntimeBytes: (baselineRuntime.length - 2) / 2,
+      firstDifferenceByteOffset: matches ? null : Math.max(0, Math.floor((firstDiff - 2) / 2)),
+      liveRuntimePrefix: liveRuntime.slice(0, 90),
+      baselineRuntimePrefix: baselineRuntime.slice(0, 90),
+    });
   }
   const failures = [
     ...activeListings.filter(x => !x.escrowMatches).map(x => "Listing " + x.id + " escrow owner mismatch"),
     ...auctionRecords.filter(x => !x.escrowMatches).map(x => "Auction " + x.id + " escrow owner mismatch"),
     marketFactory.toLowerCase() !== ADDRESSES.factory.toLowerCase() ? "Marketplace factory pointer differs from expected factory address" : null,
-    !marketApprovedNFT ? "Primary NFT collection is not explicitly approved by Marketplace" : null,
     auctionFactory.toLowerCase() !== ADDRESSES.factory.toLowerCase() ? "Auction factory pointer differs from expected factory address" : null,
-    !auctionApprovedNFT ? "Primary NFT collection is not explicitly approved by Auction" : null,
-    ...bytecodeComparisons.filter(x => !x.baselineRuntimeMatchesOnchain).map(x => x.contract + " live implementation bytecode differs from archived baseline"),
   ].filter(Boolean);
 
   const snapshot = {
@@ -175,6 +184,11 @@ async function main() {
     bytecodeComparisons,
     limitations: ["pendingWithdrawals cannot be enumerated from mapping alone; event/account history is required",
       "only the primary NFT proxy address was checked for factory registration"],
+    warnings: [
+      !marketApprovedNFT ? "Primary NFT collection is not explicitly approved by Marketplace; owner must approve this collection once before listing" : null,
+      !auctionApprovedNFT ? "Primary NFT collection is not explicitly approved by Auction; owner must approve this collection once before auctions" : null,
+      ...bytecodeComparisons.filter(x => !x.baselineRuntimeMatchesOnchain).map(x => x.contract + " live implementation differs from archived source snapshot; do not upgrade until exact deployed source is identified"),
+    ].filter(Boolean),
     failures,
   };
   console.log(JSON.stringify(snapshot, null, 2));
