@@ -111,6 +111,7 @@ describe("LitVerse Collection Factory Integration Tests", function () {
       ...config(ethers, "Timed Drop"),
       saleStartTime,
       saleEndTime,
+      metadataURI: "https://media.example.test/timed-drop.json",
     };
 
     await factory.connect(creator).createCollectionWithSaleEnd(saleConfig);
@@ -119,6 +120,7 @@ describe("LitVerse Collection Factory Integration Tests", function () {
     const nft = nftFactory.attach(collection.collectionAddress);
 
     assert.equal(await nft.saleEndTime(), saleEndTime);
+    assert.equal(await nft.collectionMetadataURI(), "https://media.example.test/timed-drop.json");
     assert.equal(await nft.owner(), await creator.getAddress());
 
     await ethers.provider.send("evm_setNextBlockTimestamp", [Number(saleStartTime)]);
@@ -127,6 +129,12 @@ describe("LitVerse Collection Factory Integration Tests", function () {
       value: ethers.parseEther("0.01"),
     });
     assert.equal(await nft.totalMinted(), 1n);
+    await nft.connect(creator).setReveal(true);
+    assert.equal(await nft.tokenURI(1n), "https://media.example.test/timed-drop.json");
+    await nft.connect(creator).publicMint(1n, {
+      value: ethers.parseEther("0.01"),
+    });
+    assert.equal(await nft.tokenURI(2n), "https://media.example.test/timed-drop.json");
 
     await ethers.provider.send("evm_setNextBlockTimestamp", [Number(saleEndTime + 1n)]);
     await ethers.provider.send("evm_mine", []);
@@ -135,7 +143,7 @@ describe("LitVerse Collection Factory Integration Tests", function () {
         value: ethers.parseEther("0.01"),
       })
     );
-    assert.equal(await nft.totalMinted(), 1n);
+    assert.equal(await nft.totalMinted(), 2n);
   });
 
   it("rejects a sale end time that is not after the sale start", async function () {
@@ -152,6 +160,7 @@ describe("LitVerse Collection Factory Integration Tests", function () {
         ...config(ethers, "Invalid Timed Drop"),
         saleStartTime,
         saleEndTime: saleStartTime,
+        metadataURI: "https://media.example.test/invalid.json",
       })
     );
     assert.equal(await factory.collectionCount(), 0n);
