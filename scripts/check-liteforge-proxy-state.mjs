@@ -63,9 +63,15 @@ async function explorerVerification(address) {
     const response = await fetch(url);
     if (!response.ok) return { httpStatus: response.status, verified: false };
     const data = await response.json();
+    const sourceText = typeof data.source_code === "string" ? data.source_code : "";
     return {
       httpStatus: response.status,
       verified: data.is_verified === true,
+      featureFlags: {
+        supportsOneTransactionListing: sourceText.includes("supportsOneTransactionListing"),
+        supportsOneTransactionAuction: sourceText.includes("supportsOneTransactionAuction"),
+        hasERC721Receiver: sourceText.includes("onERC721Received"),
+      },
       name: data.name ?? null,
       compilerVersion: data.compiler_version ?? null,
       evmVersion: data.evm_version ?? null,
