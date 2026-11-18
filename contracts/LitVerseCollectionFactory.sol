@@ -88,6 +88,13 @@ contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, Pausabl
         nftImplementation = initialNFTImplementation;
     }
 
+    /// @notice Atomically switches the factory to an NFT implementation that supports sale end dates.
+    function initializeV2(address newNFTImplementation) external reinitializer(2) onlyOwner {
+        require(newNFTImplementation.code.length > 0, "Invalid implementation");
+        nftImplementation = newNFTImplementation;
+        emit NFTImplementationUpdated(newNFTImplementation);
+    }
+
     function createCollection(CollectionConfig calldata config) external whenNotPaused returns (address) {
         require(bytes(config.name).length > 0, "Name required");
         require(bytes(config.symbol).length > 0, "Symbol required");
