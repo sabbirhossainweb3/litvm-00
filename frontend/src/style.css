@@ -110,3 +110,42 @@
 .profile-action{width:100%;display:flex;align-items:center;gap:9px;padding:10px;border:0;border-radius:7px;background:#f7eee9;color:#b94a36;font-size:11px;font-weight:700;margin-top:7px;text-align:left}
 .profile-action.muted-action{background:#f6f6f3;color:#777}
 @media(max-width:430px){.head-actions{gap:6px}.profile-trigger{padding:9px;font-size:0}.profile-trigger svg{width:17px;height:17px}.profile-menu{right:0;width:min(290px,calc(100vw - 36px))}.wallet{padding:10px 9px;font-size:10px}}
+
+
+/* Single-form NFT creator */
+.nft-create-panel{max-width:900px;margin:0 auto 64px;padding:clamp(18px,3vw,32px)}
+.nft-create-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:22px;border-bottom:1px solid #eee}
+.nft-create-heading small{font-size:10px;letter-spacing:1.5px;color:#d05a43;font-weight:700}
+.nft-create-heading h3{font:600 25px 'Space Grotesk';margin:7px 0}
+.nft-create-heading p{font-size:12px;color:#85867f;line-height:1.7;margin:0;max-width:600px}
+.nft-create-mark{width:48px;height:48px;flex:0 0 auto;border-radius:13px;background:#f8e9e3;color:#d05a43;display:grid;place-items:center}
+.nft-create-form{padding-top:22px}
+.nft-create-form .fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:17px}
+.nft-create-form .fields label{font-size:12px}
+.nft-create-form .fields input{height:46px}
+.nft-create-form .fields .nft-description-field{grid-column:1/-1}
+.nft-description-field textarea{min-height:100px;resize:vertical;border:1px solid #e2e2dc;border-radius:8px;padding:12px;font:inherit;outline-color:#e27660}
+.nft-upload-section{display:grid;gap:12px;margin-top:24px}
+.nft-upload-section>div:first-child{display:flex;flex-direction:column;gap:5px}
+.nft-upload-section>div:first-child b{font-size:13px}
+.nft-upload-section>div:first-child small{font-size:11px;color:#85867f;line-height:1.5}
+.nft-upload-section .file-picker{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px dashed #d7b5aa;border-radius:10px;background:#fff9f6;padding:18px;cursor:pointer}
+.nft-upload-section .file-picker input{width:100%;font-size:12px}
+.nft-upload-section .upload-prompt{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#c6533d}
+.nft-upload-section .file-picker small{font-size:10px;color:#85867f;font-weight:400}
+.nft-create-footer{margin-top:22px;padding-top:18px;border-top:1px solid #eee}
+.nft-create-footer p{font-size:11px;color:#85867f;line-height:1.7;margin:0 0 14px}
+.nft-create-button{min-width:180px}
+.connect-hint{display:block;color:#9a6b5f;font-size:11px;margin-top:10px}
+.upload-preview button{margin-left:auto}
+@media(max-width:600px){
+ .nft-create-panel{padding:18px;margin-bottom:42px}
+ .nft-create-heading h3{font-size:21px}
+ .nft-create-form .fields{grid-template-columns:1fr}
+ .nft-create-form .fields .nft-description-field{grid-column:auto}
+ .nft-create-mark{width:40px;height:40px}
+ .nft-upload-section .file-picker{padding:14px}
+ .nft-create-button{width:100%}
+ .upload-preview{align-items:flex-start;flex-wrap:wrap}
+ .upload-preview button{margin-left:0}
+}
