@@ -26,6 +26,8 @@
     "@openzeppelin/contracts-upgradeable": "^5.4.0"
   },
   "scripts": {
-    "deploy:liteforge": "hardhat run scripts/deploy-liteforge.ts --network liteforge"
+    "deploy:liteforge": "hardhat run scripts/deploy-liteforge.ts --network liteforge",
+    "compile": "hardhat compile",
+    "test": "hardhat test"
   }
 }
