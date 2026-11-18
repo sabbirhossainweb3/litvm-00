@@ -68,19 +68,11 @@ describe("LitVerse Marketplace Integration", function () {
       await marketProxy.getAddress()
     );
 
-    // Approve Marketplace
-    await nft.connect(seller).approve(
-      await marketplace.getAddress(),
-      1n
-    );
-
-    // List NFT
+    // List in one transaction with no prior approve/setApprovalForAll call.
     const salePrice = ethers.parseEther("1");
-
-    await marketplace.connect(seller).listNFT(
-      await nft.getAddress(),
-      1n,
-      salePrice
+    const listingData = ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [salePrice]);
+    await nft.connect(seller)["safeTransferFrom(address,address,uint256,bytes)"](
+      await seller.getAddress(), await marketplace.getAddress(), 1n, listingData
     );
 
     assert.equal(
