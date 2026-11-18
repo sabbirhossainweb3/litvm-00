@@ -1,4 +1,4 @@
-name: LiteForge read-only proxy snapshot
+name: LiteForge read-only proxy snapshot (Zeeve retry)
 on:
   workflow_dispatch:
   push:
