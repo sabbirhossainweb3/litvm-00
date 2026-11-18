@@ -2,8 +2,8 @@ import { mkdirSync, writeFileSync } from "node:fs";
 
 const EXPLORER = "https://explorer.testnet.liteforge.zeeve.net/api/v2/smart-contracts/";
 const targets = [
-  { address: "0x52859fF5CdA81C672f336b99EEd3AD49dD5bD5FE", contract: "LitVerseMarketplace", baseline: "LitVerseMarketplaceLiveV1" },
-  { address: "0x9F15878EeD9E721F8313Bb8E6d44b24bA8CCba5C", contract: "LitVerseAuction", baseline: "LitVerseAuctionLiveV1" },
+  { address: "0x9914F5f46dd37Bf5F5a54b2B1eB7618c4897D3c4", contract: "LitVerseMarketplace", baseline: "LitVerseMarketplaceLiveV1" },
+  { address: "0x074CD851A0C05A4B8bbfBAC790bA5ca3E77725C2", contract: "LitVerseAuction", baseline: "LitVerseAuctionLiveV1" },
 ];
 
 mkdirSync("contracts/upgrade-baselines/live", { recursive: true });
