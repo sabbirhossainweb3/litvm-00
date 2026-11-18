@@ -8,7 +8,7 @@ const A={nft:import.meta.env.VITE_LITVERSE_NFT_ADDRESS||'0xbf076fe848CE7Bf9864Cc
 const N=['function name() view returns(string)','function symbol() view returns(string)','function owner() view returns(address)','function maxSupply() view returns(uint256)','function mintPrice() view returns(uint256)','function walletLimit() view returns(uint256)','function saleStartTime() view returns(uint256)','function totalMinted() view returns(uint256)','function revealed() view returns(bool)','function setReveal(bool)','function paused() view returns(bool)','function walletMinted(address) view returns(uint256)','function publicMint(uint256) payable','function setTokenURI(uint256,string)','function tokenURI(uint256) view returns(string)','function ownerOf(uint256) view returns(address)','function setApprovalForAll(address,bool)','function isApprovedForAll(address,address) view returns(bool)','function safeTransferFrom(address,address,uint256,bytes)','event NFTMinted(address indexed to,uint256 indexed tokenId)'];
 const M=['function cancelListing(uint256)','function nextListingId() view returns(uint256)','function listings(uint256) view returns(address,uint256,address,uint256,bool)','function listNFT(address,uint256,uint256)','function supportsOneTransactionListing() view returns(bool)','function buyNFT(uint256) payable','function cancelListing(uint256)','function isCollectionApproved(address) view returns(bool)','function platformFeeBps() view returns(uint256)','function paused() view returns(bool)','event NFTListed(uint256 indexed listingId,address indexed nftContract,uint256 indexed tokenId,address seller,uint256 price)','event NFTSold(uint256 indexed listingId,address buyer,address seller,uint256 price)'];
 const U=['function supportsOneTransactionAuction() view returns(bool)','function nextAuctionId() view returns(uint256)','function auctions(uint256) view returns(address,uint256,address,uint256,uint256,address,uint256,bool,bool)','function createAuction(address,uint256,uint256,uint256) returns(uint256)','function placeBid(uint256) payable','function finalizeAuction(uint256)','function claimNFT(uint256)','function cancelAuction(uint256)','function pendingWithdrawals(address) view returns(uint256)','function withdraw()','event AuctionCreated(uint256 indexed auctionId,address indexed nftContract,uint256 indexed tokenId,address seller,uint256 reservePrice,uint256 endTime)','event BidPlaced(uint256 indexed auctionId,address indexed bidder,uint256 amount)'];
-const F=['function collectionCount() view returns(uint256)','function collections(uint256) view returns(address,address,string,string,uint256)','function createCollection((string name,string symbol,uint256 maxSupply,uint256 mintPrice,uint256 walletLimit,uint256 saleStartTime,string hiddenMetadataURI) config)','function createCollectionWithSaleEnd((string name,string symbol,uint256 maxSupply,uint256 mintPrice,uint256 walletLimit,uint256 saleStartTime,uint256 saleEndTime,string hiddenMetadataURI) config) returns(address)','event CollectionCreated(uint256 indexed collectionId,address indexed collectionAddress,address indexed creator,string name,string symbol)'];
+const F=['function collectionCount() view returns(uint256)','function collections(uint256) view returns(address,address,string,string,uint256)','function createCollection((string name,string symbol,uint256 maxSupply,uint256 mintPrice,uint256 walletLimit,uint256 saleStartTime,string hiddenMetadataURI) config)','function createCollectionWithSaleEnd((string name,string symbol,uint256 maxSupply,uint256 mintPrice,uint256 walletLimit,uint256 saleStartTime,uint256 saleEndTime,string metadataURI,string hiddenMetadataURI) config) returns(address)','event CollectionCreated(uint256 indexed collectionId,address indexed collectionAddress,address indexed creator,string name,string symbol)'];
 const provider=new JsonRpcProvider(rpcUrl,{chainId:4441,name:'LiteForge'});
 const fmt=x=>{try{return Number(formatEther(x)).toLocaleString(undefined,{maximumFractionDigits:4})+' zkLTC'}catch{return '—'}};
 const short=x=>x?x.slice(0,6)+'…'+x.slice(-4):'—';
@@ -65,25 +65,23 @@ function App(){
    const metadataUrl=supabase.storage.from('nft-media').getPublicUrl(metadataPath).data.publicUrl;
    const c=await contracts(),factory=c.f;
    const collectionName=name.trim()+' Collection',symbolValue=symbolFromName(name);
-   setNotice('Confirm transaction 1 of 4: create your NFT collection.');
-   const createTx=await factory.createCollectionWithSaleEnd({name:collectionName,symbol:symbolValue,maxSupply:supplyValue,mintPrice:mintValue,walletLimit:limitValue,saleStartTime:BigInt(startTs),saleEndTime:BigInt(endTs),hiddenMetadataURI:'ipfs://hidden.json'});
+   setNotice('Confirm transaction 1 of 3: create your NFT collection.');
+   const createTx=await factory.createCollectionWithSaleEnd({name:collectionName,symbol:symbolValue,maxSupply:supplyValue,mintPrice:mintValue,walletLimit:limitValue,saleStartTime:BigInt(startTs),saleEndTime:BigInt(endTs),metadataURI:metadataUrl,hiddenMetadataURI:'ipfs://hidden.json'});
    const createReceipt=await createTx.wait();
    if(!createReceipt||createReceipt.status!==1)throw Error('Collection creation transaction failed.');
    let collectionAddress='';
    for(const log of createReceipt.logs){try{const parsed=factory.interface.parseLog(log);if(parsed?.name==='CollectionCreated'){collectionAddress=parsed.args.collectionAddress;break}}catch{}}
    if(!collectionAddress)throw Error('Collection was created but its address could not be read from the transaction receipt.');
    const nft=new Contract(collectionAddress,N,wp);
-   setNotice('Collection created. Confirm transaction 2 of 4: mint your first NFT.');
+   setNotice('Collection created. Confirm transaction 2 of 3: mint your first NFT.');
    const mintTx=await nft.publicMint(1n,{value:mintValue});
    const mintReceipt=await mintTx.wait();
    if(!mintReceipt||mintReceipt.status!==1)throw Error('Collection was created, but the first NFT mint failed.');
    let mintedId='';
    for(const log of mintReceipt.logs){try{const parsed=nft.interface.parseLog(log);if(parsed?.name==='NFTMinted'){mintedId=parsed.args.tokenId.toString();break}}catch{}}
    if(!mintedId)throw Error('NFT minted, but the token ID could not be read.');
-   setNotice('NFT minted. Confirm transaction 3 of 4: reveal this collection so its artwork can display.');
+   setNotice('NFT minted. Confirm transaction 3 of 3: reveal the collection and publish its artwork.');
    const revealTx=await nft.setReveal(true);await revealTx.wait();
-   setNotice('Artwork uploaded. Confirm transaction 4 of 4: save NFT metadata on-chain.');
-   const uriTx=await nft.setTokenURI(BigInt(mintedId),metadataUrl);await uriTx.wait();
    setSelected(collectionAddress);setUriId(mintedId);setImageFile(null);setImagePreview('');
    setNotice('Success! Your NFT collection and NFT #'+mintedId+' are live on LiteForge.');
    await refresh();setTab('My NFTs');
