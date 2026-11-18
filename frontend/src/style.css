@@ -149,3 +149,15 @@
  .upload-preview{align-items:flex-start;flex-wrap:wrap}
  .upload-preview button{margin-left:0}
 }
+
+
+.nft-detail-backdrop{position:fixed;inset:0;background:#171815b8;z-index:50;display:grid;place-items:center;padding:18px}
+.nft-detail-modal{position:relative;width:min(520px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:16px;padding:24px;box-shadow:0 24px 80px #0004}
+.nft-detail-close{position:absolute;right:14px;top:12px;border:0;border-radius:50%;width:34px;height:34px;background:#f1f1ed;font-size:23px}
+.nft-detail-image{width:100%;max-height:280px;object-fit:contain;border-radius:10px;background:#f3f2ee;margin-bottom:18px}
+.nft-detail-modal>small{color:#d05a43;font-weight:700;letter-spacing:1.5px}
+.nft-detail-modal h2{font:600 25px "Space Grotesk";margin:8px 0}
+.nft-detail-modal p{font-size:13px;color:#73736d;line-height:1.7}
+.nft-detail-modal dl{display:grid;grid-template-columns:110px minmax(0,1fr);gap:10px;font-size:11px;margin:18px 0;overflow-wrap:anywhere}
+.nft-detail-modal dt{color:#888}.nft-detail-modal dd{margin:0;color:#292a27;font-weight:600}
+.nft-detail-modal>a{color:#c94d37;font-size:12px;font-weight:700}
