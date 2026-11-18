@@ -1,0 +1,20 @@
+name: LiteForge read-only proxy snapshot
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/check-liteforge-proxy-state.mjs"
+      - ".github/workflows/liteforge-state-check.yml"
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Read LiteForge proxy and escrow state (no transactions)
+        run: node scripts/check-liteforge-proxy-state.mjs
