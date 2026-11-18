@@ -54,4 +54,3 @@ function App(){
 }
 function PageTitle({title,subtitle}){return <div className="page-title"><small>LITVERSE / LITFORGE</small><h1>{title}</h1><p>{subtitle}</p></div>}
 function Empty({title,text}){return <div className="empty"><ImageIcon/><h3>{title}</h3><p>{text}</p></div>}
-createRoot(document.getElementById('root')).render(<React.StrictMode><App/></React.StrictMode>);
