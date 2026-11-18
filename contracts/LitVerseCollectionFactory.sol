@@ -21,20 +21,18 @@ interface ILitVerseNFTInitializer {
         string memory hiddenMetadataURI
     ) external;
 
-    struct NFTInitConfig {
-        address initialOwner;
-        string collectionName;
-        string collectionSymbol;
+    struct SaleWindowConfig {
+        string name;
+        string symbol;
         uint256 maxSupply;
         uint256 mintPrice;
         uint256 walletLimit;
         uint256 saleStartTime;
         uint256 saleEndTime;
-        address royaltyReceiver;
         string hiddenMetadataURI;
     }
 
-    function initializeWithSaleEnd(NFTInitConfig calldata config) external;
+    function initializeWithSaleEnd(address initialOwner, SaleWindowConfig calldata config) external;
 }
 
 contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, PausableUpgradeable, UUPSUpgradeable {
@@ -145,21 +143,19 @@ contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, Pausabl
         require(config.saleEndTime > config.saleStartTime, "Invalid sale window");
         require(nftImplementation.code.length > 0, "Invalid implementation");
 
-        ILitVerseNFTInitializer.NFTInitConfig memory nftConfig = ILitVerseNFTInitializer.NFTInitConfig({
-            initialOwner: msg.sender,
-            collectionName: config.name,
-            collectionSymbol: config.symbol,
+        ILitVerseNFTInitializer.SaleWindowConfig memory nftConfig = ILitVerseNFTInitializer.SaleWindowConfig({
+            name: config.name,
+            symbol: config.symbol,
             maxSupply: config.maxSupply,
             mintPrice: config.mintPrice,
             walletLimit: config.walletLimit,
             saleStartTime: config.saleStartTime,
             saleEndTime: config.saleEndTime,
-            royaltyReceiver: msg.sender,
             hiddenMetadataURI: config.hiddenMetadataURI
         });
         bytes memory initData = abi.encodeCall(
             ILitVerseNFTInitializer.initializeWithSaleEnd,
-            (nftConfig)
+            (msg.sender, nftConfig)
         );
 
         address collectionAddress = address(new ERC1967Proxy(nftImplementation, initData));
