@@ -56,17 +56,61 @@ for (const target of targets) {
     throw new Error(target.name + " proxy has empty implementation slot");
   }
 
+  // First trust the Explorer's own verification record. A verified
+  // implementation has already passed the Explorer's compiler/bytecode
+  // comparison; the current local build may legitimately differ from the
+  // historical build used for deployment.
+  let current = await explorerGet(implementation);
+  if (current.is_verified === true && typeof current.source_code === "string") {
+    console.log("ALREADY VERIFIED", target.name, "proxy", target.address, "implementation", implementation);
+    continue;
+  }
+
+  // Only submit a source when the current local build reproduces the live
+  // implementation byte-for-byte. Never publish a merely similar source.
   const { info, artifact } = getBuildInfo(target.file, target.name);
   const deployed = (await provider.getCode(implementation)).toLowerCase();
   const expected = ("0x" + artifact.evm.deployedBytecode.object).toLowerCase();
   if (deployed !== expected) {
     throw new Error(
       target.name + " implementation " + implementation +
-      " bytecode does not exactly match the current repository build. Refusing to publish incorrect source."
+      " is not verified on Explorer and does not exactly match the current repository build. " +
+      "Refusing to publish incorrect source. Recover the exact deployment source/compiler settings first."
     );
   }
 
-  let current = await explorerGet(implementation);
+  const form = new URLSearchParams({
+    codeformat: "solidity-standard-json-input",
+    contractaddress: implementation,
+    contractname: target.file + ":" + target.name,
+    compilerversion: "v" + info.solcVersion,
+    sourceCode: JSON.stringify(info.input),
+  });
+  const response = await fetch(API + "?module=contract&action=verifysourcecode", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: form,
+  });
+  const submitted = await response.json();
+  if (submitted.status !== "1") {
+    throw new Error("Explorer rejected verification for " + target.name + ": " + JSON.stringify(submitted));
+  }
+  const guid = submitted.result;
+  let verified = false;
+  for (let attempt = 0; attempt < 30; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    const statusResponse = await fetch(API + "?module=contract&action=checkverifystatus&guid=" + encodeURIComponent(guid));
+    const status = await statusResponse.json();
+    if (status.status === "1" && /pass|verified/i.test(String(status.result))) {
+      verified = true;
+      break;
+    }
+    if (status.status === "0" && /fail|error/i.test(String(status.result))) {
+      throw new Error("Explorer verification failed for " + target.name + ": " + JSON.stringify(status));
+    }
+  }
+  if (!verified) throw new Error("Verification pending or timed out for " + target.name + " (" + guid + ")");
+  current = await explorerGet(implementation);
   if (current.is_verified !== true || typeof current.source_code !== "string") {
     const form = new URLSearchParams({
       codeformat: "solidity-standard-json-input",
