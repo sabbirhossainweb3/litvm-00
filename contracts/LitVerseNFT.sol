@@ -33,16 +33,14 @@ contract LitVerseNFT is
     // Appended for storage-safe compatibility with existing NFT proxies.
     uint256 public saleEndTime;
 
-    struct NFTInitConfig {
-        address initialOwner;
-        string collectionName;
-        string collectionSymbol;
+    struct SaleWindowConfig {
+        string name;
+        string symbol;
         uint256 maxSupply;
         uint256 mintPrice;
         uint256 walletLimit;
         uint256 saleStartTime;
         uint256 saleEndTime;
-        address royaltyReceiver;
         string hiddenMetadataURI;
     }
 
@@ -73,19 +71,18 @@ contract LitVerseNFT is
     }
 
     /// @notice Initializer for factory-created collections with an enforced mint end time.
-    function initializeWithSaleEnd(NFTInitConfig calldata config) public initializer {
+    function initializeWithSaleEnd(address initialOwner, SaleWindowConfig calldata config) public initializer {
         require(config.saleEndTime > config.saleStartTime, "Invalid sale window");
-        require(config.initialOwner != address(0), "Invalid owner");
-        require(config.royaltyReceiver != address(0), "Invalid royalty receiver");
-        require(bytes(config.collectionName).length > 0, "Name required");
-        require(bytes(config.collectionSymbol).length > 0, "Symbol required");
+        require(initialOwner != address(0), "Invalid owner");
+        require(bytes(config.name).length > 0, "Name required");
+        require(bytes(config.symbol).length > 0, "Symbol required");
         require(config.maxSupply > 0, "Invalid supply");
         require(config.walletLimit > 0, "Invalid wallet limit");
 
-        __ERC721_init(config.collectionName, config.collectionSymbol);
+        __ERC721_init(config.name, config.symbol);
         __ERC721URIStorage_init();
         __ERC2981_init();
-        __Ownable_init(config.initialOwner);
+        __Ownable_init(initialOwner);
         __Pausable_init();
         __ReentrancyGuard_init();
         __UUPSUpgradeable_init();
@@ -97,7 +94,7 @@ contract LitVerseNFT is
         saleEndTime = config.saleEndTime;
         hiddenMetadataURI = config.hiddenMetadataURI;
 
-        _setDefaultRoyalty(config.royaltyReceiver, 500);
+        _setDefaultRoyalty(initialOwner, 500);
     }
 
     function _initializeNFT(
