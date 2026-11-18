@@ -1,7 +1,7 @@
 name: LitVerse frontend build
 on:
   push:
-    branches: [litverse-marketplace-site]
+    branches: [main]
     paths:
       - "frontend/**"
       - ".github/workflows/frontend-build.yml"
