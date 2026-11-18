@@ -20,6 +20,19 @@ interface ILitVerseNFTInitializer {
         address royaltyReceiver,
         string memory hiddenMetadataURI
     ) external;
+
+    function initializeWithSaleEnd(
+        address initialOwner,
+        string memory collectionName,
+        string memory collectionSymbol,
+        uint256 maxSupply,
+        uint256 mintPrice,
+        uint256 walletLimit,
+        uint256 saleStartTime,
+        uint256 saleEndTime,
+        address royaltyReceiver,
+        string memory hiddenMetadataURI
+    ) external;
 }
 
 contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, PausableUpgradeable, UUPSUpgradeable {
@@ -33,6 +46,17 @@ contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, Pausabl
         uint256 mintPrice;
         uint256 walletLimit;
         uint256 saleStartTime;
+        string hiddenMetadataURI;
+    }
+
+    struct SaleWindowCollectionConfig {
+        string name;
+        string symbol;
+        uint256 maxSupply;
+        uint256 mintPrice;
+        uint256 walletLimit;
+        uint256 saleStartTime;
+        uint256 saleEndTime;
         string hiddenMetadataURI;
     }
 
@@ -81,6 +105,48 @@ contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, Pausabl
                 config.mintPrice,
                 config.walletLimit,
                 config.saleStartTime,
+                msg.sender,
+                config.hiddenMetadataURI
+            )
+        );
+
+        address collectionAddress = address(new ERC1967Proxy(nftImplementation, initData));
+        uint256 collectionId = ++collectionCount;
+
+        collections[collectionId] = Collection(
+            collectionAddress, msg.sender, config.name, config.symbol, block.timestamp
+        );
+        isRegisteredCollection[collectionAddress] = true;
+
+        emit CollectionCreated(collectionId, collectionAddress, msg.sender, config.name, config.symbol);
+        return collectionAddress;
+    }
+
+    /// @notice Creates a new collection whose public mint closes at saleEndTime.
+    /// @dev Existing createCollection remains unchanged for backward compatibility.
+    function createCollectionWithSaleEnd(SaleWindowCollectionConfig calldata config)
+        external
+        whenNotPaused
+        returns (address)
+    {
+        require(bytes(config.name).length > 0, "Name required");
+        require(bytes(config.symbol).length > 0, "Symbol required");
+        require(config.maxSupply > 0, "Invalid max supply");
+        require(config.walletLimit > 0, "Invalid wallet limit");
+        require(config.saleEndTime > config.saleStartTime, "Invalid sale window");
+        require(nftImplementation.code.length > 0, "Invalid implementation");
+
+        bytes memory initData = abi.encodeCall(
+            ILitVerseNFTInitializer.initializeWithSaleEnd,
+            (
+                msg.sender,
+                config.name,
+                config.symbol,
+                config.maxSupply,
+                config.mintPrice,
+                config.walletLimit,
+                config.saleStartTime,
+                config.saleEndTime,
                 msg.sender,
                 config.hiddenMetadataURI
             )
