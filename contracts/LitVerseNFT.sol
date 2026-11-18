@@ -30,6 +30,9 @@ contract LitVerseNFT is
 
     mapping(address => uint256) public walletMinted;
 
+    // Appended for storage-safe compatibility with existing NFT proxies.
+    uint256 public saleEndTime;
+
     event NFTMinted(address indexed to, uint256 indexed tokenId);
     event SaleConfigured(uint256 price, uint256 startTime, uint256 walletLimit);
     event RevealUpdated(bool revealed);
@@ -50,6 +53,44 @@ contract LitVerseNFT is
         address royaltyReceiver,
         string memory _hiddenMetadataURI
     ) public initializer {
+        _initializeNFT(
+            initialOwner, collectionName, collectionSymbol, _maxSupply,
+            _mintPrice, _walletLimit, _saleStartTime, royaltyReceiver, _hiddenMetadataURI
+        );
+    }
+
+    /// @notice Initializer for factory-created collections with an enforced mint end time.
+    function initializeWithSaleEnd(
+        address initialOwner,
+        string memory collectionName,
+        string memory collectionSymbol,
+        uint256 _maxSupply,
+        uint256 _mintPrice,
+        uint256 _walletLimit,
+        uint256 _saleStartTime,
+        uint256 _saleEndTime,
+        address royaltyReceiver,
+        string memory _hiddenMetadataURI
+    ) public initializer {
+        require(_saleEndTime > _saleStartTime, "Invalid sale window");
+        _initializeNFT(
+            initialOwner, collectionName, collectionSymbol, _maxSupply,
+            _mintPrice, _walletLimit, _saleStartTime, royaltyReceiver, _hiddenMetadataURI
+        );
+        saleEndTime = _saleEndTime;
+    }
+
+    function _initializeNFT(
+        address initialOwner,
+        string memory collectionName,
+        string memory collectionSymbol,
+        uint256 _maxSupply,
+        uint256 _mintPrice,
+        uint256 _walletLimit,
+        uint256 _saleStartTime,
+        address royaltyReceiver,
+        string memory _hiddenMetadataURI
+    ) internal {
         require(initialOwner != address(0), "Invalid owner");
         require(royaltyReceiver != address(0), "Invalid royalty receiver");
         require(bytes(collectionName).length > 0, "Name required");
@@ -81,6 +122,7 @@ contract LitVerseNFT is
         whenNotPaused
     {
         require(block.timestamp >= saleStartTime, "Sale not started");
+        require(saleEndTime == 0 || block.timestamp <= saleEndTime, "Sale ended");
         require(quantity > 0, "Invalid quantity");
         require(totalMinted + quantity <= maxSupply, "Max supply reached");
         require(walletMinted[msg.sender] + quantity <= walletLimit, "Wallet limit reached");
