@@ -127,6 +127,7 @@ async function main() {
     walletLimit: 1n,
     saleStartTime: BigInt(latest.timestamp + 60),
     saleEndTime: BigInt(latest.timestamp + 3600),
+    metadataURI: "https://media.example.test/preflight.json",
     hiddenMetadataURI: "ipfs://hidden.json",
   };
   const simulatedAddress = await upgradedFactory.createCollectionWithSaleEnd.staticCall(testConfig);
