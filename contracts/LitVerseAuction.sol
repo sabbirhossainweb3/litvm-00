@@ -90,12 +90,6 @@ contract LitVerseAuction is
 
         IERC721 nft = IERC721(nftContract);
         require(nft.ownerOf(tokenId) == msg.sender, "Not NFT owner");
-        require(
-            nft.getApproved(tokenId) == address(this) ||
-            nft.isApprovedForAll(msg.sender, address(this)),
-            "Auction not approved"
-        );
-
         uint256 auctionId = nextAuctionId;
         nft.safeTransferFrom(
             msg.sender,
