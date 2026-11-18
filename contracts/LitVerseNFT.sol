@@ -33,6 +33,19 @@ contract LitVerseNFT is
     // Appended for storage-safe compatibility with existing NFT proxies.
     uint256 public saleEndTime;
 
+    struct NFTInitConfig {
+        address initialOwner;
+        string collectionName;
+        string collectionSymbol;
+        uint256 maxSupply;
+        uint256 mintPrice;
+        uint256 walletLimit;
+        uint256 saleStartTime;
+        uint256 saleEndTime;
+        address royaltyReceiver;
+        string hiddenMetadataURI;
+    }
+
     event NFTMinted(address indexed to, uint256 indexed tokenId);
     event SaleConfigured(uint256 price, uint256 startTime, uint256 walletLimit);
     event RevealUpdated(bool revealed);
@@ -60,24 +73,31 @@ contract LitVerseNFT is
     }
 
     /// @notice Initializer for factory-created collections with an enforced mint end time.
-    function initializeWithSaleEnd(
-        address initialOwner,
-        string memory collectionName,
-        string memory collectionSymbol,
-        uint256 _maxSupply,
-        uint256 _mintPrice,
-        uint256 _walletLimit,
-        uint256 _saleStartTime,
-        uint256 _saleEndTime,
-        address royaltyReceiver,
-        string memory _hiddenMetadataURI
-    ) public initializer {
-        require(_saleEndTime > _saleStartTime, "Invalid sale window");
-        _initializeNFT(
-            initialOwner, collectionName, collectionSymbol, _maxSupply,
-            _mintPrice, _walletLimit, _saleStartTime, royaltyReceiver, _hiddenMetadataURI
-        );
-        saleEndTime = _saleEndTime;
+    function initializeWithSaleEnd(NFTInitConfig calldata config) public initializer {
+        require(config.saleEndTime > config.saleStartTime, "Invalid sale window");
+        require(config.initialOwner != address(0), "Invalid owner");
+        require(config.royaltyReceiver != address(0), "Invalid royalty receiver");
+        require(bytes(config.collectionName).length > 0, "Name required");
+        require(bytes(config.collectionSymbol).length > 0, "Symbol required");
+        require(config.maxSupply > 0, "Invalid supply");
+        require(config.walletLimit > 0, "Invalid wallet limit");
+
+        __ERC721_init(config.collectionName, config.collectionSymbol);
+        __ERC721URIStorage_init();
+        __ERC2981_init();
+        __Ownable_init(config.initialOwner);
+        __Pausable_init();
+        __ReentrancyGuard_init();
+        __UUPSUpgradeable_init();
+
+        maxSupply = config.maxSupply;
+        mintPrice = config.mintPrice;
+        walletLimit = config.walletLimit;
+        saleStartTime = config.saleStartTime;
+        saleEndTime = config.saleEndTime;
+        hiddenMetadataURI = config.hiddenMetadataURI;
+
+        _setDefaultRoyalty(config.royaltyReceiver, 500);
     }
 
     function _initializeNFT(
