@@ -49,17 +49,6 @@ contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, Pausabl
         string hiddenMetadataURI;
     }
 
-    struct SaleWindowCollectionConfig {
-        string name;
-        string symbol;
-        uint256 maxSupply;
-        uint256 mintPrice;
-        uint256 walletLimit;
-        uint256 saleStartTime;
-        uint256 saleEndTime;
-        string hiddenMetadataURI;
-    }
-
     struct Collection {
         address collectionAddress;
         address creator;
@@ -131,7 +120,7 @@ contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, Pausabl
 
     /// @notice Creates a new collection whose public mint closes at saleEndTime.
     /// @dev Existing createCollection remains unchanged for backward compatibility.
-    function createCollectionWithSaleEnd(SaleWindowCollectionConfig calldata config)
+    function createCollectionWithSaleEnd(ILitVerseNFTInitializer.SaleWindowConfig calldata config)
         external
         whenNotPaused
         returns (address)
@@ -143,19 +132,9 @@ contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, Pausabl
         require(config.saleEndTime > config.saleStartTime, "Invalid sale window");
         require(nftImplementation.code.length > 0, "Invalid implementation");
 
-        ILitVerseNFTInitializer.SaleWindowConfig memory nftConfig = ILitVerseNFTInitializer.SaleWindowConfig({
-            name: config.name,
-            symbol: config.symbol,
-            maxSupply: config.maxSupply,
-            mintPrice: config.mintPrice,
-            walletLimit: config.walletLimit,
-            saleStartTime: config.saleStartTime,
-            saleEndTime: config.saleEndTime,
-            hiddenMetadataURI: config.hiddenMetadataURI
-        });
         bytes memory initData = abi.encodeCall(
             ILitVerseNFTInitializer.initializeWithSaleEnd,
-            (msg.sender, nftConfig)
+            (msg.sender, config)
         );
 
         address collectionAddress = address(new ERC1967Proxy(nftImplementation, initData));
