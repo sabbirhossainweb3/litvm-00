@@ -21,18 +21,7 @@ interface ILitVerseNFTInitializer {
         string memory hiddenMetadataURI
     ) external;
 
-    struct SaleWindowConfig {
-        string name;
-        string symbol;
-        uint256 maxSupply;
-        uint256 mintPrice;
-        uint256 walletLimit;
-        uint256 saleStartTime;
-        uint256 saleEndTime;
-        string hiddenMetadataURI;
-    }
-
-    function initializeWithSaleEnd(address initialOwner, SaleWindowConfig calldata config) external;
+    function initializeWithSaleEnd(address initialOwner, bytes calldata configData) external;
 }
 
 contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, PausableUpgradeable, UUPSUpgradeable {
@@ -132,9 +121,10 @@ contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, Pausabl
         require(config.saleEndTime > config.saleStartTime, "Invalid sale window");
         require(nftImplementation.code.length > 0, "Invalid implementation");
 
+        bytes memory encodedConfig = abi.encode(config);
         bytes memory initData = abi.encodeCall(
             ILitVerseNFTInitializer.initializeWithSaleEnd,
-            (msg.sender, config)
+            (msg.sender, encodedConfig)
         );
 
         address collectionAddress = address(new ERC1967Proxy(nftImplementation, initData));
