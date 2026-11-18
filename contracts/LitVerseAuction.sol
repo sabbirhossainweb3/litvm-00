@@ -201,6 +201,14 @@ contract LitVerseAuction is
         emit CollectionFactoryUpdated(factory);
     }
 
+    /// @notice One-time upgrade initializer: trust the existing LitVerse Genesis collection.
+    /// @dev Call atomically with upgradeToAndCall; no per-NFT approval is required from holders.
+    function initializeV2(address primaryCollection) external reinitializer(2) onlyOwner {
+        require(primaryCollection != address(0) && primaryCollection.code.length > 0, "Invalid primary collection");
+        approvedCollections[primaryCollection] = true;
+        emit CollectionApprovalUpdated(primaryCollection, true);
+    }
+
     function setCollectionApproval(address collection, bool approved) external onlyOwner {
         require(collection != address(0) && collection.code.length > 0, "Invalid collection");
         approvedCollections[collection] = approved;
