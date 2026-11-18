@@ -28,3 +28,34 @@
 .manual-uri label{display:flex;flex-direction:column;gap:7px;margin-top:10px}
 .manual-uri input{height:42px;border:1px solid #e2e2dc;border-radius:8px;padding:0 11px;width:100%}
 @media(max-width:720px){.media-form .file-picker{padding:13px}.upload-preview img{width:76px;height:76px}.media-form input[type=file]{font-size:11px}}
+
+
+/* Create page: clear, guided vertical workflow */
+.create-flow{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;max-width:900px;margin:0 auto 64px}
+.create-step{padding:26px 30px;margin:0}
+.create-step-head{display:flex;align-items:flex-start;gap:15px;margin-bottom:23px}
+.create-step-head>span{width:38px;height:38px;flex:0 0 38px;border-radius:12px;background:#f8e9e3;color:#cf5943;display:grid;place-items:center;font:700 15px 'Space Grotesk'}
+.create-step-head small{display:block;color:#d05a43;font-size:9px;font-weight:700;letter-spacing:1.6px;margin:1px 0 5px}
+.create-step-head h3{margin:0 0 5px;font:600 19px 'Space Grotesk'}
+.create-step-head p{margin:0;color:#85867f;font-size:12px;line-height:1.6}
+.create-step .fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.create-step .fields .span{grid-column:span 2}
+.create-step .fields .primary{min-width:220px}
+.create-step .create-select{display:flex;flex-direction:column;gap:8px;max-width:520px;margin-bottom:14px;color:#696a64;font-size:11px;font-weight:600}
+.create-step .create-select select{height:44px;border:1px solid #e2e2dc;border-radius:8px;background:#fff;padding:0 11px;min-width:0}
+.create-step>.secondary{min-width:180px}
+.create-step .step-note{border-top:1px solid #efefea;padding-top:13px;margin-top:18px;line-height:1.7}
+.create-step .media-form{max-width:650px}
+.create-step .upload-prompt{font-size:13px;color:#c6533e;font-weight:700}
+.create-step .file-picker input{margin:3px 0}
+@media(max-width:720px){
+ .create-flow{gap:13px;margin-bottom:42px}
+ .create-step{padding:20px 17px}
+ .create-step .fields{grid-template-columns:1fr}
+ .create-step .fields .span{grid-column:auto}
+ .create-step .fields .primary{width:100%}
+ .create-step-head{gap:11px;margin-bottom:19px}
+ .create-step-head h3{font-size:17px}
+ .create-step .create-select{max-width:none}
+ .create-step>.secondary{width:100%}
+}
