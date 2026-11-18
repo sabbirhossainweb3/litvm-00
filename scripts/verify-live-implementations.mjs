@@ -15,12 +15,32 @@ if (network.chainId !== 4441n) throw new Error("Wrong chain ID: " + network.chai
 
 function getBuildInfo(file, name) {
   const dir = "artifacts/build-info";
-  for (const entry of readdirSync(dir)) {
+  const wanted = file.replace(/^\.\//, "");
+  for (const entry of readdirSync(dir).filter((value) => value.endsWith(".json"))) {
     const info = JSON.parse(readFileSync(dir + "/" + entry, "utf8"));
-    const artifact = info.output?.contracts?.[file]?.[name];
-    if (artifact) return { info, artifact };
+    // Hardhat 3 build-info source keys can be normalized differently from
+    // the paths passed by the deployment scripts. Match by contract name
+    // and normalized source path instead of requiring an exact object key.
+    const contracts =
+      info.output?.contracts ??
+      info.buildInfo?.output?.contracts ??
+      info.output?.output?.contracts ??
+      {};
+    for (const [sourceName, sourceContracts] of Object.entries(contracts)) {
+      const normalized = String(sourceName).replace(/^\.\//, "");
+      const pathMatches =
+        normalized === wanted ||
+        normalized.endsWith("/" + wanted) ||
+        normalized.split("/").at(-1) === wanted.split("/").at(-1);
+      if (pathMatches && sourceContracts?.[name]) {
+        return { info, artifact: sourceContracts[name], sourceName };
+      }
+    }
   }
-  throw new Error("No build-info found for " + name);
+  throw new Error(
+    "No build-info found for " + name + " at " + file +
+    ". Check Hardhat build-info output/source paths."
+  );
 }
 
 async function explorerGet(address) {
