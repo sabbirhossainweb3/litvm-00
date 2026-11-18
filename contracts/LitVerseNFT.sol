@@ -32,6 +32,7 @@ contract LitVerseNFT is
 
     // Appended for storage-safe compatibility with existing NFT proxies.
     uint256 public saleEndTime;
+    string public collectionMetadataURI;
 
     struct SaleWindowConfig {
         string name;
@@ -41,6 +42,7 @@ contract LitVerseNFT is
         uint256 walletLimit;
         uint256 saleStartTime;
         uint256 saleEndTime;
+        string metadataURI;
         string hiddenMetadataURI;
     }
 
@@ -78,6 +80,7 @@ contract LitVerseNFT is
         require(bytes(config.symbol).length > 0, "Symbol required");
         require(config.maxSupply > 0, "Invalid supply");
         require(config.walletLimit > 0, "Invalid wallet limit");
+        require(bytes(config.metadataURI).length > 0, "Metadata URI required");
 
         __ERC721_init(config.name, config.symbol);
         __ERC721URIStorage_init();
@@ -92,6 +95,7 @@ contract LitVerseNFT is
         walletLimit = config.walletLimit;
         saleStartTime = config.saleStartTime;
         saleEndTime = config.saleEndTime;
+        collectionMetadataURI = config.metadataURI;
         hiddenMetadataURI = config.hiddenMetadataURI;
 
         _setDefaultRoyalty(initialOwner, 500);
@@ -201,7 +205,9 @@ contract LitVerseNFT is
     {
         _requireOwned(tokenId);
         if (!revealed) return hiddenMetadataURI;
-        return super.tokenURI(tokenId);
+        string memory tokenMetadataURI = super.tokenURI(tokenId);
+        if (bytes(tokenMetadataURI).length > 0) return tokenMetadataURI;
+        return collectionMetadataURI;
     }
 
     function setTokenURI(uint256 tokenId, string calldata uri) external onlyOwner {
