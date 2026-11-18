@@ -644,7 +644,7 @@ describe("LitVerse Auction Remaining Security", function () {
     );
   });
 
-  it("requires NFT approval before auction creation", async function () {
+  it("creates an auction without prior NFT approval", async function () {
     const { ethers } = await network.connect();
     const [owner, seller, fee, royalty] = await ethers.getSigners();
 
@@ -655,18 +655,9 @@ describe("LitVerse Auction Remaining Security", function () {
       value: ethers.parseEther("0.01"),
     });
 
-    await assert.rejects(
-      auction.connect(seller).createAuction(
-        await nft.getAddress(),
-        1n,
-        ethers.parseEther("0.1"),
-        3600n
-      )
-    );
-
-    await nft.connect(seller).approve(
-      await auction.getAddress(),
-      1n
+    assert.equal(
+      await nft.isApprovedForAll(await seller.getAddress(), await auction.getAddress()),
+      false
     );
 
     await auction.connect(seller).createAuction(
@@ -680,6 +671,7 @@ describe("LitVerse Auction Remaining Security", function () {
       await nft.ownerOf(1n),
       await auction.getAddress()
     );
+    assert.equal((await auction.auctions(1n)).seller, await seller.getAddress());
   });
 
   it("rejects seller bids, low bids and bids below reserve", async function () {
