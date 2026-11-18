@@ -71,8 +71,7 @@ contract LitVerseNFT is
     }
 
     /// @notice Initializer for factory-created collections with an enforced mint end time.
-    function initializeWithSaleEnd(address initialOwner, bytes calldata configData) public initializer {
-        SaleWindowConfig memory config = abi.decode(configData, (SaleWindowConfig));
+    function initializeWithSaleEnd(address initialOwner, SaleWindowConfig calldata config) public initializer {
         require(config.saleEndTime > config.saleStartTime, "Invalid sale window");
         require(initialOwner != address(0), "Invalid owner");
         require(bytes(config.name).length > 0, "Name required");
