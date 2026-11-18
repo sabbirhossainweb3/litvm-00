@@ -1,5 +1,4 @@
 import React,{useCallback,useEffect,useState} from 'react';
-import {createRoot} from 'react-dom/client';
 import {BrowserProvider,Contract,JsonRpcProvider,formatEther,parseEther} from 'ethers';
 import {Wallet,Search,Plus,Grid2X2,Gavel,Activity,Image as ImageIcon,RefreshCw,ExternalLink,ArrowUpRight,ShoppingBag,AlertCircle,CheckCircle2} from 'lucide-react';
 import './style.css';
@@ -54,3 +53,4 @@ function App(){
 }
 function PageTitle({title,subtitle}){return <div className="page-title"><small>LITVERSE / LITFORGE</small><h1>{title}</h1><p>{subtitle}</p></div>}
 function Empty({title,text}){return <div className="empty"><ImageIcon/><h3>{title}</h3><p>{text}</p></div>}
+export default App;
