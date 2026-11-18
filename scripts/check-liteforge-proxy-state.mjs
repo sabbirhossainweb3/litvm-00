@@ -1,4 +1,5 @@
 import { Contract, JsonRpcProvider, getAddress } from "ethers";
+import { readFileSync } from "node:fs";
 
 const RPC = process.env.LITEFORGE_RPC_URL || "https://rpc.testnet.liteforge.zeeve.net/";
 const ADDRESSES = {
@@ -19,6 +20,7 @@ const NFT_ABI = [
   "function paused() view returns(bool)",
   "function revealed() view returns(bool)",
   "function ownerOf(uint256) view returns(address)",
+  "function tokenURI(uint256) view returns(string)",
 ];
 const MARKET_ABI = [
   "function owner() view returns(address)",
@@ -28,6 +30,7 @@ const MARKET_ABI = [
   "function collectionFactory() view returns(address)",
   "function paused() view returns(bool)",
   "function listings(uint256) view returns(address nftContract,uint256 tokenId,address seller,uint256 price,bool active)",
+  "function approvedCollections(address) view returns(bool)",
 ];
 const AUCTION_ABI = [
   "function owner() view returns(address)",
@@ -37,6 +40,7 @@ const AUCTION_ABI = [
   "function collectionFactory() view returns(address)",
   "function paused() view returns(bool)",
   "function auctions(uint256) view returns(address nftContract,uint256 tokenId,address seller,uint256 reservePrice,uint256 highestBid,address highestBidder,uint256 endTime,bool finalized,bool claimed)",
+  "function approvedCollections(address) view returns(bool)",
 ];
 const FACTORY_ABI = [
   "function owner() view returns(address)",
@@ -44,6 +48,14 @@ const FACTORY_ABI = [
   "function collectionCount() view returns(uint256)",
   "function isRegisteredCollection(address) view returns(bool)",
 ];
+
+function stripMetadata(bytecode) {
+  const body = bytecode.slice(2);
+  if (body.length < 4) return bytecode;
+  const metadataBytes = Number.parseInt(body.slice(-4), 16);
+  const cut = (metadataBytes + 2) * 2;
+  return "0x" + (cut < body.length ? body.slice(0, -cut) : body);
+}
 
 async function proxyInfo(label, address) {
   const code = await provider.getCode(address);
@@ -87,12 +99,12 @@ async function main() {
   const factory = new Contract(ADDRESSES.factory, FACTORY_ABI, provider);
 
   const [nftOwner,nftName,nftSymbol,totalMinted,maxSupply,nftPaused,revealed,
-    marketOwner,marketFee,marketFeeRecipient,nextListingId,marketFactory,marketPaused,
-    auctionOwner,auctionFee,auctionFeeRecipient,nextAuctionId,auctionFactory,auctionPaused,
+    marketOwner,marketFee,marketFeeRecipient,nextListingId,marketFactory,marketPaused,marketApprovedNFT,
+    auctionOwner,auctionFee,auctionFeeRecipient,nextAuctionId,auctionFactory,auctionPaused,auctionApprovedNFT,
     factoryOwner,nftImplementation,collectionCount,nftRegistered] = await Promise.all([
       nft.owner(),nft.name(),nft.symbol(),nft.totalMinted(),nft.maxSupply(),nft.paused(),nft.revealed(),
-      market.owner(),market.platformFeeBps(),market.feeRecipient(),market.nextListingId(),market.collectionFactory(),market.paused(),
-      auction.owner(),auction.platformFeeBps(),auction.feeRecipient(),auction.nextAuctionId(),auction.collectionFactory(),auction.paused(),
+      market.owner(),market.platformFeeBps(),market.feeRecipient(),market.nextListingId(),market.collectionFactory(),market.paused(),market.approvedCollections(ADDRESSES.nft),
+      auction.owner(),auction.platformFeeBps(),auction.feeRecipient(),auction.nextAuctionId(),auction.collectionFactory(),auction.paused(),auction.approvedCollections(ADDRESSES.nft),
       factory.owner(),factory.nftImplementation(),factory.collectionCount(),factory.isRegisteredCollection(ADDRESSES.nft),
     ]);
 
@@ -122,11 +134,29 @@ async function main() {
 
   const activeListings = listings.filter(Boolean);
   const auctionRecords = auctions.filter(Boolean);
+  const tokenRecords = [];
+  for (let id = 1; id <= Number(totalMinted); id++) {
+    const [tokenOwner, uri] = await Promise.all([nft.ownerOf(id), nft.tokenURI(id)]);
+    tokenRecords.push({ tokenId: id, owner: tokenOwner, tokenURI: uri });
+  }
+  const bytecodeComparisons = [];
+  for (const [label, artifactPath, proxyKey] of [
+    ["marketplace", "artifacts/contracts/upgrade-baselines/LitVerseMarketplaceV1.sol/LitVerseMarketplaceV1.json", "marketplace"],
+    ["auction", "artifacts/contracts/upgrade-baselines/LitVerseAuctionV1.sol/LitVerseAuctionV1.json", "auction"],
+  ]) {
+    const artifact = JSON.parse(readFileSync(artifactPath, "utf8"));
+    const onchain = await provider.getCode(proxyInfoResult[proxyKey].implementation);
+    const matches = stripMetadata(onchain).toLowerCase() === stripMetadata(artifact.deployedBytecode).toLowerCase();
+    bytecodeComparisons.push({ contract: label, baselineRuntimeMatchesOnchain: matches });
+  }
   const failures = [
     ...activeListings.filter(x => !x.escrowMatches).map(x => "Listing " + x.id + " escrow owner mismatch"),
     ...auctionRecords.filter(x => !x.escrowMatches).map(x => "Auction " + x.id + " escrow owner mismatch"),
     marketFactory.toLowerCase() !== ADDRESSES.factory.toLowerCase() ? "Marketplace factory pointer differs from expected factory address" : null,
+    !marketApprovedNFT ? "Primary NFT collection is not explicitly approved by Marketplace" : null,
     auctionFactory.toLowerCase() !== ADDRESSES.factory.toLowerCase() ? "Auction factory pointer differs from expected factory address" : null,
+    !auctionApprovedNFT ? "Primary NFT collection is not explicitly approved by Auction" : null,
+    ...bytecodeComparisons.filter(x => !x.baselineRuntimeMatchesOnchain).map(x => x.contract + " live implementation bytecode differs from archived baseline"),
   ].filter(Boolean);
 
   const snapshot = {
@@ -134,14 +164,15 @@ async function main() {
     addresses: ADDRESSES,
     proxies: proxyInfoResult,
     nft: { owner:nftOwner,name:nftName,symbol:nftSymbol,totalMinted:totalMinted.toString(),
-      maxSupply:maxSupply.toString(),paused:nftPaused,revealed,nftRegistered },
+      maxSupply:maxSupply.toString(),paused:nftPaused,revealed,nftRegistered,tokens:tokenRecords },
     marketplace: { owner:marketOwner,platformFeeBps:marketFee.toString(),feeRecipient:marketFeeRecipient,
       nextListingId:nextListingId.toString(),collectionFactory:marketFactory,paused:marketPaused,
-      activeListingCount:activeListings.length,activeListings },
+      activeListingCount:activeListings.length,activeListings,primaryNFTApproved:marketApprovedNFT },
     auction: { owner:auctionOwner,platformFeeBps:auctionFee.toString(),feeRecipient:auctionFeeRecipient,
       nextAuctionId:nextAuctionId.toString(),collectionFactory:auctionFactory,paused:auctionPaused,
-      auctionRecordCount:auctionRecords.length,auctions:auctionRecords },
+      auctionRecordCount:auctionRecords.length,auctions:auctionRecords,primaryNFTApproved:auctionApprovedNFT },
     factory: { owner:factoryOwner,nftImplementation,collectionCount:collectionCount.toString() },
+    bytecodeComparisons,
     limitations: ["pendingWithdrawals cannot be enumerated from mapping alone; event/account history is required",
       "only the primary NFT proxy address was checked for factory registration"],
     failures,
