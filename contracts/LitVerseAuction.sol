@@ -240,12 +240,44 @@ contract LitVerseAuction is
     function pause() external onlyOwner { _pause(); }
     function unpause() external onlyOwner { _unpause(); }
 
-    function onERC721Received(address, address, uint256, bytes calldata)
-        external
-        pure
-        override
-        returns (bytes4)
-    {
+    /// @notice Indicates that auctions can be created with one NFT transfer and no prior approval.
+    function supportsOneTransactionAuction() external pure returns (bool) {
+        return true;
+    }
+
+    /// @notice Create an auction by safely transferring the NFT with abi.encode(reservePrice, duration).
+    /// @dev The NFT owner must initiate the transfer directly; operator approvals are not accepted.
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external override returns (bytes4) {
+        require(from != address(0) && operator == from, "Owner must initiate transfer");
+        require(data.length == 64, "Auction data required");
+        require(isCollectionApproved(msg.sender), "Collection not approved");
+
+        (uint256 reservePrice, uint256 duration) = abi.decode(data, (uint256, uint256));
+        require(reservePrice > 0, "Invalid reserve price");
+        require(duration >= 1 hours, "Duration too short");
+        require(duration <= 30 days, "Duration too long");
+        require(IERC721(msg.sender).ownerOf(tokenId) == address(this), "NFT not escrowed");
+
+        uint256 auctionId = nextAuctionId++;
+        uint256 endTime = block.timestamp + duration;
+        auctions[auctionId] = Auction(
+            msg.sender,
+            tokenId,
+            from,
+            reservePrice,
+            0,
+            address(0),
+            endTime,
+            false,
+            false
+        );
+
+        emit AuctionCreated(auctionId, msg.sender, tokenId, from, reservePrice, endTime);
         return IERC721Receiver.onERC721Received.selector;
     }
 
