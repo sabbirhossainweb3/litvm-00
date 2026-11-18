@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "scripts/check-liteforge-proxy-state.mjs"
+      - "scripts/upgrade-liteforge.ts"
+      - ".github/workflows/litbazaar-manual-upgrade.yml"
       - "scripts/verify-live-implementations.mjs"
       - "contracts/LitVerseMarketplace.sol"
       - "contracts/LitVerseAuction.sol"
