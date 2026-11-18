@@ -25,7 +25,7 @@ jobs:
         run: npm test
       - name: Build LitBazaar frontend
         working-directory: frontend
-        run: npm ci && npm run build
+        run: npm install --no-audit --no-fund && npm run build
       - name: Verify live implementation sources on Zeeve Explorer (bytecode match required)
         run: node scripts/verify-live-implementations.mjs
       - name: Fetch verified live implementation sources
