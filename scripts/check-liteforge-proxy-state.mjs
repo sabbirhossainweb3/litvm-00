@@ -57,6 +57,27 @@ function stripMetadata(bytecode) {
   return "0x" + (cut < body.length ? body.slice(0, -cut) : body);
 }
 
+async function explorerVerification(address) {
+  const url = "https://explorer.testnet.liteforge.zeeve.net/api/v2/smart-contracts/" + address;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return { httpStatus: response.status, verified: false };
+    const data = await response.json();
+    return {
+      httpStatus: response.status,
+      verified: data.is_verified === true,
+      name: data.name ?? null,
+      compilerVersion: data.compiler_version ?? null,
+      evmVersion: data.evm_version ?? null,
+      optimizationEnabled: data.optimization_enabled ?? null,
+      filePath: data.file_path ?? null,
+      sourceLength: typeof data.source_code === "string" ? data.source_code.length : null,
+    };
+  } catch (error) {
+    return { verified: false, error: String(error) };
+  }
+}
+
 async function proxyInfo(label, address) {
   const code = await provider.getCode(address);
   if (code === "0x") throw new Error(label + " has no bytecode at " + address);
@@ -168,6 +189,11 @@ async function main() {
     auctionFactory.toLowerCase() !== ADDRESSES.factory.toLowerCase() ? "Auction factory pointer differs from expected factory address" : null,
   ].filter(Boolean);
 
+  const explorerSources = {
+    marketplace: await explorerVerification(proxyInfoResult.marketplace.implementation),
+    auction: await explorerVerification(proxyInfoResult.auction.implementation),
+  };
+
   const snapshot = {
     network: { chainId: network.chainId.toString(), rpc: RPC },
     addresses: ADDRESSES,
@@ -182,6 +208,7 @@ async function main() {
       auctionRecordCount:auctionRecords.length,auctions:auctionRecords,primaryNFTApproved:auctionApprovedNFT },
     factory: { owner:factoryOwner,nftImplementation,collectionCount:collectionCount.toString() },
     bytecodeComparisons,
+    explorerSources,
     limitations: ["pendingWithdrawals cannot be enumerated from mapping alone; event/account history is required",
       "only the primary NFT proxy address was checked for factory registration"],
     warnings: [
