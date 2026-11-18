@@ -29,6 +29,7 @@ interface ILitVerseNFTInitializer {
         uint256 walletLimit;
         uint256 saleStartTime;
         uint256 saleEndTime;
+        string metadataURI;
         string hiddenMetadataURI;
     }
 
@@ -130,6 +131,7 @@ contract LitVerseCollectionFactory is Initializable, OwnableUpgradeable, Pausabl
         require(config.maxSupply > 0, "Invalid max supply");
         require(config.walletLimit > 0, "Invalid wallet limit");
         require(config.saleEndTime > config.saleStartTime, "Invalid sale window");
+        require(bytes(config.metadataURI).length > 0, "Metadata URI required");
         require(nftImplementation.code.length > 0, "Invalid implementation");
 
         bytes memory initData = abi.encodeCall(
