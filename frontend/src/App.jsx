@@ -14,7 +14,7 @@ const fmt=x=>{try{return Number(formatEther(x)).toLocaleString(undefined,{maximu
 const short=x=>x?x.slice(0,6)+'…'+x.slice(-4):'—';
 const localDateTime=d=>{const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,16)};
 const symbolFromName=value=>value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)||'LITNFT';
-const ipfsPath=u=>{const value=String(u||'').trim();if(!value)return '';if(value.startsWith('ipfs://'))return value.slice(7).replace(/^ipfs\\//,'');if(value.startsWith('https://')||value.startsWith('http://')){try{const url=new URL(value);const match=url.pathname.match(/\\/ipfs\\/(.+)$/);return match?match[1]:''}catch{return ''}}return value};
+const ipfsPath=u=>{const value=String(u||'').trim();if(!value)return '';if(value.startsWith('ipfs://')){const path=value.slice(7);return path.startsWith('ipfs/')?path.slice(5):path}if(value.startsWith('https://')||value.startsWith('http://')){try{const path=new URL(value).pathname;const marker='/ipfs/';const index=path.indexOf(marker);return index>=0?path.slice(index+marker.length):''}catch{return ''}}return value};
 const gateway=u=>{const value=String(u||'').trim();if(!value)return '';if(value.startsWith('ipfs://'))return 'https://dweb.link/ipfs/'+ipfsPath(value);if(value.startsWith('ar://'))return 'https://arweave.net/'+value.slice(5);return value};
 const ipfsGateways=u=>{const path=ipfsPath(u);return path?['https://dweb.link/ipfs/'+path,'https://cloudflare-ipfs.com/ipfs/'+path,'https://ipfs.io/ipfs/'+path]:[gateway(u)]};
 async function logs(address,topic,latest){let out=[];for(let f=0;f<=latest;f+=2500)out.push(...await provider.getLogs({address,topics:[topic],fromBlock:f,toBlock:Math.min(f+2499,latest)}));return out}
