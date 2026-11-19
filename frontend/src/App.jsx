@@ -90,10 +90,14 @@ function App(){
    let mintedId='';
    for(const log of mintReceipt.logs){try{const parsed=nft.interface.parseLog(log);if(parsed?.name==='NFTMinted'){mintedId=parsed.args.tokenId.toString();break}}catch{}}
    if(!mintedId)throw Error('NFT minted, but the token ID could not be read.');
-   setNotice('NFT minted. Confirm transaction 3 of 3: reveal the collection and publish its artwork.');
+   setNotice('NFT minted. Confirm transaction 3 of 4: attach the Supabase metadata URL to this NFT.');
+   const uriTx=await nft.setTokenURI(BigInt(mintedId),metadataUrl);
+   const uriReceipt=await uriTx.wait();
+   if(!uriReceipt||uriReceipt.status!==1)throw Error('NFT minted, but saving its metadata URI failed. Your artwork remains safely stored in Supabase.');
+   setNotice('NFT metadata saved. Confirm transaction 4 of 4: reveal the collection.');
    const revealTx=await nft.setReveal(true);await revealTx.wait();
    setSelected(collectionAddress);setUriId(mintedId);setImageFile(null);setImagePreview('');
-   setNotice('Success! Your NFT collection and NFT #'+mintedId+' are live on LiteForge.');
+   setNotice('Success! NFT #'+mintedId+' metadata and artwork are linked on LiteForge.');
    await refresh();setTab('My NFTs');
   }catch(e){setError(e.shortMessage||e.reason||e.message||'NFT creation failed.');}
   finally{setUploading(false)}
