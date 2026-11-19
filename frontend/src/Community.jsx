@@ -83,7 +83,7 @@ export function Community({account,onConnect}){
   const content=(commentDraft[post.id]||'').trim();if(!content)return;
   const {error:e}=await supabase.from('comments').insert({post_id:post.id,user_id:session.user.id,content});
   if(e){setError(e.message);return}
-  setCommentDraft(v=>({...v,[post.id]:''}));await loadComments(post.id);setExpanded(post.id);await loadPosts();
+  setCommentDraft(v=>({...v,[post.id]:''}));const {data:updated,error:readError}=await supabase.from('comments').select('id,post_id,user_id,parent_id,content,created_at,profiles!comments_user_id_fkey(username,wallet_address,avatar_url)').eq('post_id',post.id).order('created_at',{ascending:true}).limit(100);if(readError)throw readError;setComments(v=>({...v,[post.id]:updated||[]}));setExpanded(post.id);await loadPosts();
  };
  const categories=['All','General','NFT Showcase','Creator Zone','Marketplace','LitVM Ecosystem','Help'];
  return <section className="community-page">
