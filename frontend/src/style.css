@@ -365,3 +365,17 @@ footer{border-color:#252d3d;color:#929bb0}
 
 /* Listing form lives behind Create dropdown, not Marketplace page */
 .listing-modal{max-width:480px!important}.listing-modal h2{margin:9px 0 6px}.listing-modal>p{color:var(--muted,#888);font-size:12px}.listing-modal-fields{display:flex;flex-direction:column;gap:12px;margin-top:18px}.listing-modal-fields label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted,#999);font-weight:700}.listing-modal-fields input,.listing-modal-fields select{width:100%;padding:11px 12px;border:1px solid #33344e;background:#111522;color:#eee;border-radius:9px;outline-color:#7c51f5}.listing-modal-fields p{color:#8e90a8;font-size:10px;line-height:1.6;margin:5px 0 0}
+
+/* Magic Eden-inspired premium active auctions */
+.auction-list{background:transparent;border:0;display:grid;gap:14px;margin-bottom:64px}
+.auction-row{display:flex;align-items:center;gap:14px;padding:18px 20px;background:linear-gradient(120deg,#171622,#111119);border:1px solid #2c2938;border-radius:16px;color:#f2f0fa;box-shadow:0 10px 30px #0002;transition:transform .18s,border-color .18s}
+.auction-row:hover{transform:translateY(-2px);border-color:#51476f}
+.auction-row>div:first-child{flex:1;min-width:0}
+.auction-row>div:first-child b{font:600 17px 'Space Grotesk';color:#f3f0ff;display:block;margin-bottom:5px}
+.auction-row>div:first-child small{color:#a4a0b5;font-size:11px}
+.auction-row> b{font:600 18px 'Space Grotesk';color:#c5b8ff;white-space:nowrap}
+.auction-row input{background:#1a1923!important;color:#f5f2ff!important;border:1px solid #383448!important;border-radius:9px!important;height:44px!important}
+.auction-row input::placeholder{color:#858196}
+.auction-row .primary{background:linear-gradient(135deg,#7863e8,#5542bf);color:#fff;border-radius:9px;padding:12px 17px;min-height:44px}
+.auction-row .secondary{background:#211e2b;color:#d2cce4;border:1px solid #3a3548;border-radius:9px}
+@media(max-width:720px){.auction-list{gap:11px}.auction-row{flex-wrap:wrap;padding:15px;gap:11px}.auction-row>div:first-child{min-width:100%;flex:1 0 100%}.auction-row> b{flex:1}.auction-row input{flex:1;min-width:120px;width:auto}.auction-row .primary,.auction-row .secondary{flex:1}}
