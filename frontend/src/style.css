@@ -651,3 +651,39 @@ body{background:#08090c!important;color:#f5f5f7!important}
  .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
  .collection-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
+
+
+/* Full marketplace discovery layout */
+.marketplace-shell{display:grid;grid-template-columns:226px minmax(0,1fr);gap:28px;align-items:start;margin:22px 0 60px}
+.market-sidebar{position:sticky;top:92px;display:flex;flex-direction:column;gap:25px;padding:18px 13px;border:1px solid #292a32;border-radius:13px;background:#101116;min-height:520px}
+.sidebar-group{display:flex;flex-direction:column;gap:4px}
+.sidebar-group>small{padding:0 10px 9px;color:#777b87;font-size:9px;letter-spacing:1.4px;font-weight:800}
+.sidebar-link{display:flex;align-items:center;gap:10px;width:100%;min-width:0;padding:10px;border:0;border-radius:8px;background:transparent;color:#a9abb5;text-align:left;font-size:12px;cursor:pointer}
+.sidebar-link:hover,.sidebar-link.selected{background:#202129;color:#f5f5f7}
+.sidebar-link.selected{box-shadow:inset 2px 0 #c6f58b}
+.sidebar-link>span:last-child{margin-left:auto;color:#777b87;font-size:10px}
+.sidebar-link.collection-filter{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.collection-dot{display:grid;place-items:center;width:21px;height:21px;flex:none;border-radius:6px;background:#292b34;color:#d1f4a3;font-size:10px;font-weight:800}
+.sidebar-network{margin-top:auto;padding:13px 10px;border-top:1px solid #292a32;color:#d6d8df;font-size:11px}
+.sidebar-network i{display:inline-block;width:7px;height:7px;margin-right:7px;border-radius:50%;background:#a9ec75}
+.sidebar-network small{display:block;padding:7px 0 0 14px;color:#777b87;font-size:9px}
+.market-results{min-width:0}
+.market-results-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 19px}
+.market-results-heading small{font-size:9px;letter-spacing:1.5px;color:#b9ed8d;font-weight:800}
+.market-results-heading h2{margin:6px 0;font-size:26px;letter-spacing:-.8px}
+.market-results-heading p{margin:0;color:#8f929e;font-size:11px}
+.market-results-heading>.primary{display:flex;align-items:center;gap:8px;padding:11px 15px;border:0;border-radius:9px;font-size:11px;font-weight:800}
+.market-filterbar{display:flex;align-items:center;gap:9px;margin-bottom:17px;padding:10px;border:1px solid #292a32;border-radius:11px;background:#101116}
+.filter-search{display:flex;align-items:center;gap:8px;flex:1;min-width:130px;padding:0 10px;color:#777b87}
+.filter-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#f5f5f7;font-size:11px}
+.market-filterbar select{max-width:190px;height:36px;padding:0 10px;border:1px solid #30313a;border-radius:8px;background:#1a1b22;color:#d8d9df;font-size:10px}
+.view-toggle{display:flex;gap:3px;padding:3px;border-radius:8px;background:#1b1c23}
+.view-toggle button{display:grid;place-items:center;width:30px;height:29px;border:0;border-radius:6px;background:transparent;color:#858894}
+.view-toggle button.active{background:#343640;color:#c6f58b}
+.marketplace-nft-grid.list-view{grid-template-columns:1fr!important}
+.marketplace-nft-grid.list-view .nft-card{display:grid;grid-template-columns:140px minmax(0,1fr);align-items:center}
+.marketplace-nft-grid.list-view .nft-art{height:140px;aspect-ratio:auto}
+.marketplace-nft-grid.list-view .nft-info{padding:15px 18px!important}
+.marketplace-nft-grid.list-view .card-buttons{max-width:360px}
+@media(max-width:900px){.marketplace-shell{grid-template-columns:190px minmax(0,1fr);gap:15px}.market-filterbar{flex-wrap:wrap}.filter-search{flex-basis:100%;height:32px}.market-filterbar select{flex:1;max-width:none}}
+@media(max-width:650px){.marketplace-shell{grid-template-columns:1fr;gap:14px}.market-sidebar{position:static;min-height:0;padding:10px;gap:12px}.sidebar-group:first-child{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar-group:first-child>small{grid-column:1/-1}.sidebar-group:nth-child(2){display:none}.sidebar-network{display:none}.market-results-heading h2{font-size:22px}.market-results-heading>.primary{padding:10px}.market-filterbar select{min-width:0}.marketplace-nft-grid.list-view .nft-card{grid-template-columns:105px minmax(0,1fr)}.marketplace-nft-grid.list-view .nft-art{height:100%}.marketplace-nft-grid.list-view .nft-info{padding:10px!important}}
