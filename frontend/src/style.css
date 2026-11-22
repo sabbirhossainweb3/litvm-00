@@ -569,3 +569,85 @@ footer{border-color:#252b36!important;color:#858d9c!important}
 .explore-bottom-cta button{display:flex;align-items:center;gap:8px;white-space:nowrap}
 @media(max-width:900px){.collection-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.live-stat{padding:17px}.hero{min-height:370px!important}}
 @media(max-width:650px){.hero{grid-template-columns:1fr!important}.hero-art{min-height:230px!important}.hero-feature-art{width:min(72%,260px)}.hero-art-empty{min-height:205px}.hero-empty-mark{width:160px;height:160px;font-size:54px}.live-stats{grid-template-columns:repeat(2,minmax(0,1fr));margin:18px 0 42px}.live-stat{padding:14px 15px;border-bottom:1px solid #272e3b}.live-stat:nth-child(2){border-right:0}.live-stat:nth-child(3){border-bottom:0}.live-stat:nth-child(4){border-bottom:0;border-right:0}.live-stat b{font-size:22px}.explore-section{margin:40px 0}.explore-section .section-head{flex-direction:row!important;align-items:end!important}.section-link{font-size:10px}.explore-empty{align-items:flex-start;flex-wrap:wrap;padding:17px}.explore-empty>div{min-width:calc(100% - 50px)}.explore-empty button{margin-left:40px}.collection-feature-grid{gap:10px}.collection-feature-info{padding:10px}.collection-feature-info b{font-size:12px}.explore-bottom-cta{align-items:flex-start;flex-direction:column;padding:23px;margin:42px 0 15px}.explore-bottom-cta h2{font-size:21px}}
+
+
+/* LitBazaar marketplace UI refresh — Magic Eden-inspired information density */
+:root{color-scheme:dark}
+body{background:#08090c!important;color:#f5f5f7!important}
+.shell{background:#08090c!important;min-height:100vh}
+.shell>header{height:72px!important;min-height:72px!important;padding:0 clamp(18px,3vw,48px)!important;background:#0b0c10!important;border-bottom:1px solid #25262d!important;position:sticky!important;top:0!important;z-index:100!important;box-shadow:none!important}
+.brand{font-size:21px!important;letter-spacing:-.8px!important}
+.brand img{width:30px!important;height:30px!important}
+.shell nav{gap:5px!important}
+.shell nav button,.create-dropdown-trigger{height:40px!important;padding:0 12px!important;border:0!important;border-radius:9px!important;background:transparent!important;color:#a7a8b1!important;font-size:12px!important;font-weight:650!important}
+.shell nav button:hover,.create-dropdown-trigger:hover{background:#1b1c23!important;color:#fff!important}
+.shell nav button.active{background:#20212a!important;color:#fff!important}
+.head-actions{gap:9px!important}
+.wallet{height:40px!important;border-radius:10px!important;background:#fff!important;color:#111!important;border:0!important;font-weight:750!important;padding:0 15px!important}
+.wallet.connected{background:#20212a!important;color:#d9f99d!important;border:1px solid #343640!important}
+.refresh,.profile-trigger{height:39px!important;border-radius:9px!important;background:#17181f!important;border:1px solid #2c2d35!important;color:#d9d9df!important}
+.shell main{max-width:1720px!important;padding:0 clamp(18px,3vw,48px)!important}
+.market-toolbar{padding:17px 0 13px!important;margin:0!important;gap:14px!important}
+.market-breadcrumb{font-size:12px!important}
+.market-global-search{height:42px!important;max-width:520px!important;border-radius:10px!important;background:#15161c!important;border-color:#292a33!important}
+.market-toolbar-create{height:41px!important;background:#fff!important;color:#101014!important;border-radius:9px!important}
+.network{height:34px!important;margin:0 0 20px!important;padding:0 0 9px!important;border-bottom:1px solid #202129!important;color:#777b87!important}
+.network i{background:#a8ee70!important;box-shadow:none!important}
+.hero{min-height:300px!important;grid-template-columns:1.1fr .9fr!important;gap:20px!important;margin:10px 0 22px!important;padding:36px clamp(24px,4vw,54px)!important;border:1px solid #282932!important;border-radius:17px!important;background:radial-gradient(ellipse at 80% 45%,#272331 0,transparent 40%),#121319!important}
+.hero:after{opacity:.06!important}
+.hero label{color:#b8f28a!important;font-size:9px!important;letter-spacing:1.3px!important}
+.hero h1{font-size:clamp(36px,4vw,58px)!important;letter-spacing:-2.8px!important;line-height:1.02!important;margin:17px 0 12px!important}
+.hero h1 em{color:#c5f58c!important}
+.hero p{font-size:13px!important;max-width:510px!important;color:#a5a6b0!important}
+.hero-actions{margin-top:19px!important}
+.hero-actions button{min-height:42px!important;border-radius:9px!important}
+.hero-actions .primary,.primary{background:#c6f58b!important;color:#11140c!important;box-shadow:none!important}
+.hero-actions .secondary,.secondary{background:#202129!important;border:1px solid #343640!important;color:#eeeef2!important}
+.hero-proof{margin-top:19px!important;font-size:10px!important;gap:14px!important}
+.hero-art{min-height:210px!important}
+.hero-feature-art{width:min(100%,280px)!important;aspect-ratio:1!important;border-radius:14px!important;transform:none!important;box-shadow:0 15px 45px #0009!important}
+.hero-empty-mark{width:190px!important;height:190px!important;border-radius:22px!important;background:linear-gradient(145deg,#30313a,#14151b 65%)!important;border-color:#41434d!important;color:#d0f89e!important;box-shadow:none!important}
+.hero-art-glow{display:none!important}
+.live-stats{margin:18px 0 38px!important;border:1px solid #292a32!important;border-radius:12px!important;background:#111218!important}
+.live-stat{padding:16px 20px!important;border-color:#292a32!important}
+.live-stat small{font-size:10px!important;color:#a0a1ab!important}
+.live-stat b{font-size:23px!important;letter-spacing:-.6px!important}
+.live-stat span{color:#b9ed8d!important;font-size:8px!important}
+.explore-section{margin:38px 0!important}
+.explore-section .section-head{margin:0 0 17px!important}
+.section-head small,.page-title small{color:#b9ed8d!important;font-size:9px!important;letter-spacing:1.25px!important}
+.section-head h2,.page-title h1{font-size:25px!important;letter-spacing:-.8px!important;margin:5px 0!important}
+.section-head p,.page-title p{font-size:12px!important;color:#92939d!important}
+.section-link{color:#c6f58b!important;font-size:11px!important}
+.grid{grid-template-columns:repeat(auto-fill,minmax(205px,1fr))!important;gap:13px!important}
+.nft-card,.collection-market-card,.collection-feature-card{background:#111218!important;border:1px solid #292a32!important;border-radius:12px!important;box-shadow:none!important}
+.nft-card:hover,.collection-market-card:hover,.collection-feature-card:hover{transform:translateY(-3px)!important;border-color:#777d67!important;box-shadow:0 12px 32px #0008!important}
+.nft-art,.collection-market-art{background:#1b1c23!important}
+.nft-art i{background:#101116e8!important;color:#d2f7a2!important}
+.nft-info{padding:12px!important}
+.nft-info>small{color:#a9d97d!important;font-size:9px!important}
+.nft-info h3{font-size:13px!important}
+.listing-price-row b{font-size:15px!important}
+.card-buttons button{border-radius:8px!important;background:#202129!important;border-color:#353640!important}
+.card-buttons .listing-buy{background:#c6f58b!important;border-color:#c6f58b!important;color:#11140c!important}
+.collection-feature-grid{grid-template-columns:repeat(auto-fill,minmax(205px,1fr))!important;gap:13px!important}
+.collection-feature-art{aspect-ratio:1.15!important;background:#1b1c23!important}
+.collection-feature-info{padding:12px!important}
+.collection-feature-info>span{color:#c6f58b!important}
+.explore-empty,.empty{background:#111218!important;border-color:#34353e!important;border-radius:12px!important}
+.explore-empty>svg{color:#c6f58b!important}
+.explore-bottom-cta{margin:46px 0 20px!important;padding:26px 30px!important;border-radius:14px!important;border-color:#34353e!important;background:#14151b!important}
+.explore-bottom-cta small{color:#c6f58b!important}
+.explore-bottom-cta h2{font-size:22px!important}
+.panel,.two-panels>section,.nft-create-panel,.auction-create-compact,.auction-row,.activity>div,.nft-detail-modal{background:#111218!important;border-color:#2b2c35!important;border-radius:12px!important}
+@media(max-width:760px){
+ .shell>header{position:relative!important;height:auto!important;padding:10px 14px!important}
+ .shell nav button,.create-dropdown-trigger{height:36px!important;padding:0 9px!important}
+ .shell main{padding:0 14px!important}
+ .hero{grid-template-columns:1fr!important;padding:24px 20px!important;min-height:0!important}
+ .hero-art{min-height:190px!important}
+ .hero-feature-art{width:min(70%,240px)!important}
+ .live-stat{padding:13px!important}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+ .collection-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
